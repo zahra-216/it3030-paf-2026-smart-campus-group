@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.paf.unidesk.config.JwtUtil;
+import com.paf.unidesk.dto.request.UpdateProfileRequest;
 import com.paf.unidesk.enums.Role;
 import com.paf.unidesk.exception.ResourceNotFoundException;
 import com.paf.unidesk.model.User;
@@ -36,4 +37,13 @@ public class AuthService {
         user.setRole(Role.valueOf(role));
         return userRepository.save(user);
     }
+
+    public User updateProfile(String token, UpdateProfileRequest request) {
+    String email = jwtUtil.extractEmail(token);
+    User user = userRepository.findByEmail(email)
+            .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+    user.setUserType(request.getUserType());
+    user.setIsProfileComplete(true);
+    return userRepository.save(user);
+}
 }
