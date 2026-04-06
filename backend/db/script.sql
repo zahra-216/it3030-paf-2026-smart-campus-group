@@ -1,0 +1,99 @@
+CREATE DATABASE IF NOT EXISTS unidesk;
+USE unidesk;
+
+CREATE TABLE users (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255),
+    email VARCHAR(255) NOT NULL UNIQUE,
+    profile_picture VARCHAR(500),
+    role ENUM('USER', 'TECHNICIAN', 'ADMIN') NOT NULL,
+    user_type ENUM('STUDENT', 'STAFF', 'LECTURER') NULL,
+    oauth_provider ENUM('GOOGLE', 'GITHUB') NOT NULL,
+    oauth_id VARCHAR(255),
+    is_profile_complete BOOLEAN NOT NULL DEFAULT FALSE,
+	created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+	updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE resources (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    type ENUM('LAB', 'LECTURE_HALL', 'MEETING_ROOM', 'EQUIPMENT') NOT NULL,
+    capacity INT,
+    location VARCHAR(255),
+    status ENUM('ACTIVE', 'OUT_OF_SERVICE') NOT NULL,
+    available_from TIME,
+    available_until TIME,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+	updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE bookings (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    resource_id BIGINT NOT NULL,
+    date DATE NOT NULL,
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL,
+    purpose VARCHAR(500),
+    attendees INT,
+    status ENUM('PENDING', 'APPROVED', 'REJECTED', 'CANCELLED') NOT NULL,
+    reviewed_by BIGINT NULL,
+    rejection_reason VARCHAR(500),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+	updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (resource_id) REFERENCES resources(id) ON DELETE CASCADE,
+    FOREIGN KEY (reviewed_by) REFERENCES users(id) ON DELETE SET NULL
+);
+
+CREATE TABLE tickets (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    created_by BIGINT NOT NULL,
+    resource_id BIGINT NOT NULL,
+    location VARCHAR(255),
+    title VARCHAR(255) NOT NULL,
+    description TEXT NOT NULL,
+    category ENUM('ELECTRICAL', 'PLUMBING', 'EQUIPMENT', 'FURNITURE', 'OTHER') NOT NULL,
+    priority ENUM('LOW', 'MEDIUM', 'HIGH') NOT NULL,
+    status ENUM('OPEN', 'IN_PROGRESS', 'RESOLVED', 'CLOSED', 'REJECTED') NOT NULL,
+    assigned_to BIGINT NULL,
+    resolution_notes TEXT,
+    rejection_reason VARCHAR(500),
+    contact_details VARCHAR(255),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+	updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (resource_id) REFERENCES resources(id) ON DELETE CASCADE,
+    FOREIGN KEY (assigned_to) REFERENCES users(id) ON DELETE SET NULL
+);
+
+CREATE TABLE ticket_attachments (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    ticket_id BIGINT NOT NULL,
+    file_url VARCHAR(500) NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (ticket_id) REFERENCES tickets(id)
+);
+
+CREATE TABLE comments (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    ticket_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    content TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+	updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (ticket_id) REFERENCES tickets(id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE notifications (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    message VARCHAR(500) NOT NULL,
+    type ENUM('BOOKING', 'TICKET', 'COMMENT') NOT NULL,
+    is_read BOOLEAN NOT NULL DEFAULT FALSE,
+    reference_id BIGINT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
