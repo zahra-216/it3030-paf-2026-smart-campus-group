@@ -5,6 +5,7 @@ import com.paf.unidesk.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -25,5 +26,19 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<String> logout() {
         return ResponseEntity.ok("Logged out successfully");
+    }
+
+    // Get all users - Admin only
+    @GetMapping("/users")
+    public ResponseEntity<List<User>> getAllUsers() {
+        List<User> users = authService.getAllUsers();
+        return ResponseEntity.ok(users);
+    }
+
+    // Update user role - Admin only
+    @PutMapping("/users/{id}/role")
+    public ResponseEntity<User> updateUserRole(@PathVariable Long id, @RequestParam String role) {
+        User updatedUser = authService.updateUserRole(id, role);
+        return ResponseEntity.ok(updatedUser);
     }
 }
