@@ -1,10 +1,11 @@
 package com.paf.unidesk.repository;
 
-import com.paf.unidesk.model.User;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
+import com.paf.unidesk.model.User;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
