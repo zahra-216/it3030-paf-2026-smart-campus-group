@@ -11,14 +11,6 @@ function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/oauth2/callback" element={<OAuthCallback />} />
             <Route
-                path="/complete-profile"
-                element={
-                    <ProtectedRoute>
-                        <CompleteProfile />
-                    </ProtectedRoute>
-                }
-            />
-            <Route
                 path="/dashboard"
                 element={
                     <ProtectedRoute>

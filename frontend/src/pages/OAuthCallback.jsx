@@ -26,11 +26,7 @@ export default function OAuthCallback() {
         })
         .then((response) => {
             const user = response.data;
-            if (!user.isProfileComplete) {
-                navigate("/complete-profile");
-            } else {
                 navigate("/dashboard");
-            }
         })
         .catch((error) => {
             console.error("Error fetching user:", error);
