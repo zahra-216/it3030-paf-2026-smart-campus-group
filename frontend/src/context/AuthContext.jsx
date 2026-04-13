@@ -22,20 +22,6 @@ export const AuthProvider = ({ children }) => {
         }
     }, [token]);
 
-    const fetchCurrentUser = async () => {
-        const storedToken = localStorage.getItem("token");
-        if (!storedToken) return null;
-        try {
-            const response = await axios.get("http://localhost:8081/api/auth/me", {
-                headers: { Authorization: `Bearer ${storedToken}` }
-            });
-            setUser(response.data);
-            return response.data;
-        } catch {
-            return null;
-        }
-    };
-
     const login = (newToken) => { localStorage.setItem("token", newToken); setToken(newToken); };
     const logout = () => { localStorage.removeItem("token"); setToken(null); setUser(null); };
 

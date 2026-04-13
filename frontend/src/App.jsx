@@ -1,7 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
 import OAuthCallback from "./pages/OAuthCallback";
-import CompleteProfile from "./pages/CompleteProfile";
 import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -10,14 +9,6 @@ function App() {
         <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/oauth2/callback" element={<OAuthCallback />} />
-            <Route
-                path="/complete-profile"
-                element={
-                    <ProtectedRoute>
-                        <CompleteProfile />
-                    </ProtectedRoute>
-                }
-            />
             <Route
                 path="/dashboard"
                 element={

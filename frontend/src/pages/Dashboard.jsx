@@ -4,6 +4,7 @@ import PageLayout from "../components/layout/PageLayout";
 import AdminDashboard from "./dashboard/AdminDashboard";
 import UserDashboard from "./dashboard/UserDashboard";
 import NotificationsPage from "./NotificationsPage";
+import UsersAndRolesPage from "./UsersAndRolesPage";
 
 export default function Dashboard() {
     const { user } = useAuth();
@@ -15,6 +16,8 @@ export default function Dashboard() {
                 return user?.role === "ADMIN" ? <AdminDashboard /> : <UserDashboard />;
             case "notifications":
                 return <NotificationsPage />;
+            case "users":
+                return <UsersAndRolesPage />;
             default:
                 return (
                     <div style={styles.empty}>
