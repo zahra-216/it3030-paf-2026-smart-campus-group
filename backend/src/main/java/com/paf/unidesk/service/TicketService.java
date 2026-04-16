@@ -10,6 +10,9 @@ import com.paf.unidesk.repository.ResourceRepository;
 import com.paf.unidesk.repository.TicketRepository;
 import com.paf.unidesk.repository.UserRepository;
 import com.paf.unidesk.enums.Role;
+import com.paf.unidesk.model.Comment;
+import com.paf.unidesk.repository.CommentRepository;
+import com.paf.unidesk.dto.request.CommentRequest;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,6 +26,7 @@ public class TicketService {
     private final TicketRepository ticketRepository;
     private final UserRepository userRepository;
     private final ResourceRepository resourceRepository;
+    private final CommentRepository commentRepository;
 
     // ✅ CREATE TICKET
     public TicketResponse createTicket(TicketRequest request, Long userId) {
@@ -264,5 +268,35 @@ public TicketResponse technicianUpdateTicket(
     ticketRepository.save(ticket);
 
     return mapToResponse(ticket);
+}
+
+// ADD COMMENT TO TICKET
+public Comment addComment(
+        Long ticketId,
+        Long userId,
+        CommentRequest request) {
+
+    Ticket ticket = ticketRepository.findById(ticketId)
+            .orElseThrow(() -> new RuntimeException("Ticket not found"));
+
+    User user = userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+
+    Comment comment = Comment.builder()
+            .ticket(ticket)
+            .user(user)
+            .content(request.getContent())
+            .build();
+
+    return commentRepository.save(comment);
+}
+
+// GET COMMENTS FOR TICKET
+public List<Comment> getComments(Long ticketId) {
+
+    Ticket ticket = ticketRepository.findById(ticketId)
+            .orElseThrow(() -> new RuntimeException("Ticket not found"));
+
+    return commentRepository.findByTicketOrderByCreatedAtAsc(ticket);
 }
 }

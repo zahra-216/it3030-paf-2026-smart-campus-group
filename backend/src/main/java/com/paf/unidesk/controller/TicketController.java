@@ -3,6 +3,8 @@ package com.paf.unidesk.controller;
 import com.paf.unidesk.dto.request.TicketRequest;
 import com.paf.unidesk.dto.response.TicketResponse;
 import com.paf.unidesk.service.TicketService;
+import com.paf.unidesk.model.Comment;
+import com.paf.unidesk.dto.request.CommentRequest;
 
 import lombok.RequiredArgsConstructor;
 
@@ -105,6 +107,28 @@ public ResponseEntity<TicketResponse> technicianUpdateTicket(
                     technicianId,
                     request
             )
+    );
+}
+
+// ADD COMMENT TO TICKET
+@PostMapping("/{ticketId}/comments/{userId}")
+public ResponseEntity<Comment> addComment(
+        @PathVariable Long ticketId,
+        @PathVariable Long userId,
+        @RequestBody CommentRequest request) {
+
+    return ResponseEntity.ok(
+            ticketService.addComment(ticketId, userId, request)
+    );
+}
+
+// GET COMMENTS FOR TICKET
+@GetMapping("/{ticketId}/comments")
+public ResponseEntity<List<Comment>> getComments(
+        @PathVariable Long ticketId) {
+
+    return ResponseEntity.ok(
+            ticketService.getComments(ticketId)
     );
 }
 }
