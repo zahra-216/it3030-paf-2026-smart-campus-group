@@ -12,6 +12,8 @@ import com.paf.unidesk.repository.TicketAttachmentRepository;
 import com.paf.unidesk.repository.TicketRepository;
 import com.paf.unidesk.repository.UserRepository;
 import com.paf.unidesk.enums.Role;
+import com.paf.unidesk.enums.TicketCategory;
+import com.paf.unidesk.enums.TicketPriority;
 import com.paf.unidesk.model.Comment;
 import com.paf.unidesk.repository.CommentRepository;
 import com.paf.unidesk.dto.request.CommentRequest;
@@ -400,5 +402,78 @@ public void deleteAttachment(Long attachmentId) {
     }
 
     ticketAttachmentRepository.delete(attachment);
+}
+
+// FILTER TICKETS (ADMIN)
+public List<TicketResponse> filterTickets(
+        TicketStatus status,
+        TicketPriority priority,
+        TicketCategory category) {
+
+    List<Ticket> tickets;
+
+    if (status != null && priority != null && category != null) {
+        tickets = ticketRepository.findByStatusAndPriorityAndCategory(status, priority, category);
+
+    } else if (status != null && priority != null) {
+        tickets = ticketRepository.findByStatusAndPriority(status, priority);
+
+    } else if (status != null && category != null) {
+        tickets = ticketRepository.findByStatusAndCategory(status, category);
+
+    } else if (priority != null && category != null) {
+        tickets = ticketRepository.findByPriorityAndCategory(priority, category);
+
+    } else if (status != null) {
+        tickets = ticketRepository.findByStatus(status);
+
+    } else if (priority != null) {
+        tickets = ticketRepository.findByPriority(priority);
+
+    } else if (category != null) {
+        tickets = ticketRepository.findByCategory(category);
+
+    } else {
+        tickets = ticketRepository.findAll();
+    }
+
+    return tickets.stream()
+            .map(this::mapToResponse)
+            .toList();
+}
+
+// ADMIN REJECT TICKET
+public TicketResponse rejectTicket(Long ticketId, Long adminId, TicketRequest request) {
+
+    Ticket ticket = ticketRepository.findById(ticketId)
+            .orElseThrow(() -> new RuntimeException("Ticket not found"));
+
+    User admin = userRepository.findById(adminId)
+            .orElseThrow(() -> new RuntimeException("Admin not found"));
+
+    // ONLY ADMIN CAN REJECT
+    if (admin.getRole() != Role.ADMIN) {
+        throw new RuntimeException("Only ADMIN can reject tickets");
+    }
+
+    //  prevent invalid states
+    if (ticket.getStatus() == TicketStatus.CLOSED ||
+        ticket.getStatus() == TicketStatus.RESOLVED) {
+        throw new RuntimeException("Cannot reject this ticket");
+    }
+
+    //  MUST HAVE REASON
+    if (request.getRejectionReason() == null ||
+        request.getRejectionReason().trim().isEmpty()) {
+        throw new RuntimeException("Rejection reason is required");
+    }
+
+    //  update ticket
+    ticket.setStatus(TicketStatus.REJECTED);
+    ticket.setRejectionReason(request.getRejectionReason());
+
+    ticketRepository.save(ticket);
+
+    return mapToResponse(ticket);
 }
 }

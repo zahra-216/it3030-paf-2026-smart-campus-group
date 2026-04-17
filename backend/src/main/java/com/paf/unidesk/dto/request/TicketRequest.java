@@ -16,5 +16,6 @@ public class TicketRequest {
     private String contactDetails;
     private String status;
     private String resolutionNotes;
+    private String rejectionReason;
     
 }
