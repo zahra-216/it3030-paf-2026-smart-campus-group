@@ -46,8 +46,4 @@ public class User extends BaseEntity {
     private OAuthProvider oauthProvider;
 
     private String oauthId;
-
-    @Builder.Default
-    @Column(nullable = false)
-    private Boolean isProfileComplete = false;
 }
