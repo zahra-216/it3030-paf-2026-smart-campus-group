@@ -2,6 +2,9 @@ package com.paf.unidesk.controller;
 
 import com.paf.unidesk.dto.request.TicketRequest;
 import com.paf.unidesk.dto.response.TicketResponse;
+import com.paf.unidesk.enums.TicketCategory;
+import com.paf.unidesk.enums.TicketPriority;
+import com.paf.unidesk.enums.TicketStatus;
 import com.paf.unidesk.service.TicketService;
 import com.paf.unidesk.model.Comment;
 import com.paf.unidesk.model.TicketAttachment;
@@ -174,5 +177,29 @@ public List<TicketAttachment> getAttachments(@PathVariable Long ticketId) {
 public ResponseEntity<String> deleteAttachment(@PathVariable Long id) {
     ticketService.deleteAttachment(id);
     return ResponseEntity.ok("Attachment deleted successfully");
+}
+
+// ADMIN FILTER TICKETS
+@GetMapping("/filter")
+public ResponseEntity<List<TicketResponse>> filterTickets(
+        @RequestParam(required = false) TicketStatus status,
+        @RequestParam(required = false) TicketPriority priority,
+        @RequestParam(required = false) TicketCategory category) {
+
+    return ResponseEntity.ok(
+            ticketService.filterTickets(status, priority, category)
+    );
+}
+
+// ADMIN REJECT TICKET
+@PutMapping("/{ticketId}/reject/{adminId}")
+public ResponseEntity<TicketResponse> rejectTicket(
+        @PathVariable Long ticketId,
+        @PathVariable Long adminId,
+        @RequestBody TicketRequest request) {
+
+    return ResponseEntity.ok(
+            ticketService.rejectTicket(ticketId, adminId, request)
+    );
 }
 }
