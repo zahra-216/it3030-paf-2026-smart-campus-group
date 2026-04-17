@@ -72,7 +72,6 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                     .oauthId(oauthId)
                     .oauthProvider(oAuthProvider)
                     .role(Role.USER)
-                    .isProfileComplete(false)
                     .build();
             userRepository.save(user);
         }
