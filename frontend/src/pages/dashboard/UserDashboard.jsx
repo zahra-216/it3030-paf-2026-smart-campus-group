@@ -175,14 +175,6 @@ const styles = {
     greetDate: { fontSize: "0.72rem", color: "#9CA3AF", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 },
     greetTitle: { fontFamily: "var(--font-heading)", fontSize: "1.75rem", fontWeight: 700, color: "#111827", marginBottom: 4 },
     greetHint: { fontSize: "0.85rem", color: "#6B7280" },
-    rolePill: {
-        display: "flex", alignItems: "center", gap: 6,
-        background: "#1B4332", color: "#fff",
-        padding: "7px 16px", borderRadius: 50,
-        fontSize: "0.78rem", fontWeight: 600,
-        textTransform: "uppercase", letterSpacing: "0.04em",
-    },
-    roleDot: { width: 6, height: 6, borderRadius: "50%", background: "var(--color-accent)", flexShrink: 0 },
 
     statsRow: { display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14 },
 

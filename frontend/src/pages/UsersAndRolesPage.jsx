@@ -139,7 +139,9 @@ export default function UsersAndRolesPage() {
             {toast && (
                 <div style={{
                     ...styles.toast,
-                    backgroundColor: toast.type === "success" ? "var(--color-primary)" : "#DC2626",
+                    backgroundColor: toast.type === "success"
+                        ? "rgba(78, 125, 91, 0.85)" 
+                        : "rgba(220, 38, 38, 0.85)",
                 }}>
                     <span>{toast.type === "success" ? "✅" : "❌"}</span>
                     {toast.message}
@@ -243,13 +245,23 @@ const styles = {
         gap: "1.25rem", fontFamily: "var(--font-body)", position: "relative",
     },
     toast: {
-        position: "fixed", top: "50%", left: "50%",
-        transform: "translate(-50%, -50%)",
-        color: "var(--color-white)", padding: "1rem 2rem",
-        borderRadius: 12, fontSize: "0.95rem", fontWeight: 600,
-        display: "flex", alignItems: "center", gap: 8,
-        zIndex: 1000, boxShadow: "0 8px 32px rgba(0,0,0,0.2)",
-        minWidth: 300, justifyContent: "center",
+        position: "fixed",
+        top: "1.5rem",
+        left: "50%",
+        transform: "translateX(-50%)",
+        color: "var(--color-white)",
+        padding: "0.75rem 1.5rem",
+        borderRadius: 10,
+        fontSize: "0.875rem",
+        fontWeight: 600,
+        display: "flex",
+        alignItems: "center",
+        gap: 8,
+        zIndex: 1000,
+        boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+        minWidth: 280,
+        justifyContent: "center",
+        backdropFilter: "blur(8px)",
     },
     header: { display: "flex", alignItems: "center", justifyContent: "space-between" },
     headerTitle: {
