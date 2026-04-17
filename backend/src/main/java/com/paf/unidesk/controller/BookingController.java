@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.*;
 import com.paf.unidesk.enums.BookingStatus;
 import com.paf.unidesk.model.Booking;
 import com.paf.unidesk.service.BookingService;
-
 @RestController
 @RequestMapping("/api/bookings")
+@CrossOrigin
 public class BookingController {
 
     @Autowired
@@ -26,6 +26,12 @@ public class BookingController {
     @GetMapping
     public List<Booking> getAllBookings() {
         return bookingService.getAllBookings();
+    }
+
+    // ✅ Get booking by ID
+    @GetMapping("/{id}")
+    public Booking getBookingById(@PathVariable Long id) {
+        return bookingService.getBookingById(id);
     }
 
     // ✅ Get bookings by status
@@ -47,5 +53,12 @@ public class BookingController {
             @RequestParam String reason
     ) {
         return bookingService.rejectBooking(id, reason);
+    }
+
+    // ✅ Delete booking
+    @DeleteMapping("/{id}")
+    public String deleteBooking(@PathVariable Long id) {
+        bookingService.deleteBooking(id);
+        return "Booking deleted successfully";
     }
 }
