@@ -5,8 +5,10 @@ import com.paf.unidesk.dto.response.TicketResponse;
 import com.paf.unidesk.enums.TicketStatus;
 import com.paf.unidesk.model.Resource;
 import com.paf.unidesk.model.Ticket;
+import com.paf.unidesk.model.TicketAttachment;
 import com.paf.unidesk.model.User;
 import com.paf.unidesk.repository.ResourceRepository;
+import com.paf.unidesk.repository.TicketAttachmentRepository;
 import com.paf.unidesk.repository.TicketRepository;
 import com.paf.unidesk.repository.UserRepository;
 import com.paf.unidesk.enums.Role;
@@ -16,7 +18,9 @@ import com.paf.unidesk.dto.request.CommentRequest;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.util.List;
 
 @Service
@@ -27,6 +31,7 @@ public class TicketService {
     private final UserRepository userRepository;
     private final ResourceRepository resourceRepository;
     private final CommentRepository commentRepository;
+    private final TicketAttachmentRepository ticketAttachmentRepository;
 
     // ✅ CREATE TICKET
     public TicketResponse createTicket(TicketRequest request, Long userId) {
@@ -92,6 +97,7 @@ public class TicketService {
             .location(ticket.getLocation())
             .contactDetails(ticket.getContactDetails())
             .resolutionNotes(ticket.getResolutionNotes());
+            
 
     if (ticket.getAssignedTo() != null) {
         builder.assignedToId(ticket.getAssignedTo().getId())
@@ -282,11 +288,13 @@ public Comment addComment(
     User user = userRepository.findById(userId)
             .orElseThrow(() -> new RuntimeException("User not found"));
 
+
     Comment comment = Comment.builder()
             .ticket(ticket)
             .user(user)
             .content(request.getContent())
             .build();
+               
 
     return commentRepository.save(comment);
 }
@@ -298,5 +306,99 @@ public List<Comment> getComments(Long ticketId) {
             .orElseThrow(() -> new RuntimeException("Ticket not found"));
 
     return commentRepository.findByTicketOrderByCreatedAtAsc(ticket);
+}
+
+// UPDATE COMMENT
+public Comment updateComment(Long commentId, Long userId, CommentRequest request) {
+
+    Comment comment = commentRepository.findById(commentId)
+            .orElseThrow(() -> new RuntimeException("Comment not found"));
+
+    // only owner can edit
+    if (!comment.getUser().getId().equals(userId)) {
+        throw new RuntimeException("You can only edit your own comments");
+    }
+
+    comment.setContent(request.getContent());
+
+    return commentRepository.save(comment);
+}
+
+// DELETE COMMENT
+public void deleteComment(Long commentId, Long userId) {
+
+    Comment comment = commentRepository.findById(commentId)
+            .orElseThrow(() -> new RuntimeException("Comment not found"));
+
+    boolean isOwner = comment.getUser().getId().equals(userId);
+    boolean isAdmin = comment.getUser().getRole().equals(Role.ADMIN);
+
+    if (!isOwner && !isAdmin) {
+        throw new RuntimeException("Not allowed to delete comment");
+    }
+
+    commentRepository.delete(comment);
+}
+
+// UPLOAD ATTACHMENT
+public String uploadAttachment(Long ticketId, MultipartFile file) throws Exception {
+
+    Ticket ticket = ticketRepository.findById(ticketId)
+            .orElseThrow(() -> new RuntimeException("Ticket not found"));
+
+    // STEP 1: CHECK MAX LIMIT (3 attachments per ticket)
+    int existingCount = ticketAttachmentRepository.countByTicket(ticket);
+
+    if (existingCount >= 3) {
+        throw new RuntimeException("Maximum 3 attachments allowed per ticket");
+    }
+
+    // STEP 2: CREATE UPLOAD DIRECTORY
+    String uploadDir = System.getProperty("user.dir") + File.separator + "uploads" + File.separator;
+
+    File dir = new File(uploadDir);
+    if (!dir.exists()) {
+        dir.mkdirs();
+    }
+
+    // STEP 3: SAVE FILE
+    String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+    String filePath = uploadDir + fileName;
+
+    file.transferTo(new File(filePath));
+
+    // STEP 4: SAVE DB RECORD
+    TicketAttachment attachment = TicketAttachment.builder()
+            .ticket(ticket)
+            .fileUrl(fileName)
+            .build();
+
+    ticketAttachmentRepository.save(attachment);
+
+    return "Attachment uploaded successfully";
+}
+
+// GET ATTACHMENTS FOR TICKET
+public List<TicketAttachment> getAttachments(Long ticketId) {
+
+    Ticket ticket = ticketRepository.findById(ticketId)
+            .orElseThrow(() -> new RuntimeException("Ticket not found"));
+
+    return ticketAttachmentRepository.findByTicket(ticket);
+}
+
+// DELETE ATTACHMENT
+public void deleteAttachment(Long attachmentId) {
+
+    TicketAttachment attachment = ticketAttachmentRepository.findById(attachmentId)
+            .orElseThrow(() -> new RuntimeException("Attachment not found"));
+
+    // delete physical file
+    File file = new File("uploads/" + attachment.getFileUrl());
+    if (file.exists()) {
+        file.delete();
+    }
+
+    ticketAttachmentRepository.delete(attachment);
 }
 }

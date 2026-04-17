@@ -21,4 +21,5 @@ public class TicketResponse {
     private Long assignedToId;
     private String assignedToName;
     private String resolutionNotes;
+   
 }

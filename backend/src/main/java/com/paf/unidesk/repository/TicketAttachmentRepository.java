@@ -9,4 +9,6 @@ import java.util.List;
 public interface TicketAttachmentRepository extends JpaRepository<TicketAttachment, Long> {
 
     List<TicketAttachment> findByTicket(Ticket ticket);
+    
+    int countByTicket(Ticket ticket);
 }
