@@ -4,12 +4,14 @@ import com.paf.unidesk.dto.request.TicketRequest;
 import com.paf.unidesk.dto.response.TicketResponse;
 import com.paf.unidesk.service.TicketService;
 import com.paf.unidesk.model.Comment;
+import com.paf.unidesk.model.TicketAttachment;
 import com.paf.unidesk.dto.request.CommentRequest;
 
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -130,5 +132,47 @@ public ResponseEntity<List<Comment>> getComments(
     return ResponseEntity.ok(
             ticketService.getComments(ticketId)
     );
+}
+
+// UPDATE COMMENT
+@PutMapping("/comments/{commentId}/user/{userId}")
+public ResponseEntity<Comment> updateComment(
+        @PathVariable Long commentId,
+        @PathVariable Long userId,
+        @RequestBody CommentRequest request
+) {
+    return ResponseEntity.ok(ticketService.updateComment(commentId, userId, request));
+}
+
+// DELETE COMMENT
+@DeleteMapping("/comments/{commentId}/user/{userId}")
+public ResponseEntity<String> deleteComment(
+        @PathVariable Long commentId,
+        @PathVariable Long userId
+) {
+    ticketService.deleteComment(commentId, userId);
+    return ResponseEntity.ok("Comment deleted successfully");
+}
+
+// UPLOAD ATTACHMENT
+@PostMapping("/{ticketId}/attachments")
+public String uploadAttachment(
+        @PathVariable Long ticketId,
+        @RequestParam("file") MultipartFile file) throws Exception {
+
+    return ticketService.uploadAttachment(ticketId, file);
+}
+
+// GET ATTACHMENTS FOR TICKET
+@GetMapping("/{ticketId}/attachments")
+public List<TicketAttachment> getAttachments(@PathVariable Long ticketId) {
+    return ticketService.getAttachments(ticketId);
+}
+
+// DELETE ATTACHMENT
+@DeleteMapping("/attachments/{id}")
+public ResponseEntity<String> deleteAttachment(@PathVariable Long id) {
+    ticketService.deleteAttachment(id);
+    return ResponseEntity.ok("Attachment deleted successfully");
 }
 }
