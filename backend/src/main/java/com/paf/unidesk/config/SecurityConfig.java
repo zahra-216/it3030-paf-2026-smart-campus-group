@@ -54,6 +54,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/users").hasRole("ADMIN")
                 .requestMatchers("/api/auth/users/**").hasRole("ADMIN")
                 .requestMatchers("/api/notifications/**").authenticated()
+                
                 .anyRequest().authenticated()
             )
             .oauth2Login(oauth2 -> oauth2
