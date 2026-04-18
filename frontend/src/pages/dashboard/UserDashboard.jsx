@@ -2,6 +2,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useState, useEffect } from "react";
 import StatCard from "../../components/ui/StatCard";
 import Badge from "../../components/ui/Badge";
+import axios from "axios";
 
 const myBookings = [
     { id: 1, resource: "Computer Lab B", date: "Apr 11, 2026", time: "13:00 - 15:00", status: "PENDING" },
@@ -24,7 +25,50 @@ export default function UserDashboard() {
         return () => clearInterval(interval);
     }, []);
 
-    const { user } = useAuth();
+    const { user, token } = useAuth();
+
+    const [unreadCount, setUnreadCount] = useState(0);
+
+    useEffect(() => {
+        if (token) {
+            axios.get("http://localhost:8081/api/notifications/unread/count", {
+                headers: { Authorization: `Bearer ${token}` }
+            })
+            .then(res => setUnreadCount(res.data.unreadCount))
+            .catch(() => {});
+        }
+    }, [token]);
+
+    const [myTickets, setMyTickets] = useState([]);
+    const [resourceCount, setResourceCount] = useState(0);
+
+    useEffect(() => {
+        if (user?.id) {
+            // fetch my tickets
+            axios.get(`http://localhost:8081/api/tickets/my?userId=${user.id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            })
+            .then(res => setMyTickets(res.data))
+            .catch(() => setMyTickets([]));
+
+            // fetch resources count
+            axios.get("http://localhost:8081/api/resources", {
+                headers: { Authorization: `Bearer ${token}` }
+            })
+            .then(res => setResourceCount(res.data.length))
+            .catch(() => {});
+        }
+    }, [user, token]);
+
+    useEffect(() => {
+        if (user?.id) {
+            axios.get(`http://localhost:8081/api/tickets/my?userId=${user.id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            })
+            .then(res => setMyTickets(res.data))
+            .catch(() => setMyTickets([]));
+        }
+    }, [user, token]);
 
     const greeting = (() => {
         const h = new Date().getHours();
@@ -61,10 +105,34 @@ export default function UserDashboard() {
 
             {/* Stats */}
             <div style={styles.statsRow}>
-                <StatCard label="My Bookings" value={String(myBookings.length)} icon="📅" sub="2 upcoming" subColor="#059669" />
-                <StatCard label="My Tickets" value={String(myTickets.length)} icon="🔧" sub="1 in progress" subColor="#D97706" />
-                <StatCard label="Available Resources" value="48" icon="🏛️" sub="Explore now" subColor="#1B4332" />
-                <StatCard label="Notifications" value="0" icon="🔔" sub="All caught up" subColor="#6B7280" />
+                <StatCard
+                    label="My Bookings"
+                    value="0"
+                    icon="📅"
+                    sub="Coming soon"
+                    subColor="#059669"
+                />
+                <StatCard
+                    label="My Tickets"
+                    value={String(myTickets.length)}
+                    icon="🔧"
+                    sub={`${myTickets.filter(t => t.status === "IN_PROGRESS").length} in progress`}
+                    subColor="#D97706"
+                />
+                <StatCard
+                    label="Available Resources"
+                    value={String(resourceCount)}
+                    icon="🏛️"
+                    sub="Explore now"
+                    subColor="var(--color-primary)"
+                />
+                <StatCard
+                    label="Notifications"
+                    value={String(unreadCount)}
+                    icon="🔔"
+                    sub={unreadCount > 0 ? `${unreadCount} unread` : "All caught up"}
+                    subColor="#6B7280"
+                />
             </div>
 
             {/* Quick Actions */}

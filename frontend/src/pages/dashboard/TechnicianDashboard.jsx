@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import StatCard from "../../components/ui/StatCard";
 import Badge from "../../components/ui/Badge";
+import axios from "axios";
 
 const myTickets = [
     { id: "TK-001", issue: "Projector malfunction in Hall C", priority: "HIGH", status: "OPEN", location: "Hall C", category: "EQUIPMENT" },
@@ -11,7 +12,22 @@ const myTickets = [
 ];
 
 export default function TechnicianDashboard() {
-    const { user } = useAuth();
+    const { user, token } = useAuth();
+
+    const [myTickets, setMyTickets] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        if (user?.id) {
+            axios.get(`http://localhost:8081/api/tickets/my-assigned/${user.id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            })
+            .then(res => setMyTickets(res.data))
+            .catch(() => setMyTickets([]))
+            .finally(() => setLoading(false));
+        }
+    }, [user, token]);
+
     const [time, setTime] = useState(
         new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })
     );
@@ -22,6 +38,21 @@ export default function TechnicianDashboard() {
         }, 1000);
         return () => clearInterval(interval);
     }, []);
+
+    const handleResolve = async (ticketId) => {
+        try {
+            await axios.put(
+                `http://localhost:8081/api/tickets/${ticketId}/technician-update/${user.id}`,
+                { status: "RESOLVED", resolutionNotes: "Issue resolved" },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            setMyTickets(prev =>
+                prev.map(t => t.id === ticketId ? { ...t, status: "RESOLVED" } : t)
+            );
+        } catch (err) {
+            console.error("Failed to resolve ticket");
+        }
+    };
 
     const greeting = (() => {
         const h = new Date().getHours();
@@ -104,7 +135,7 @@ export default function TechnicianDashboard() {
                                 <td style={styles.td}><Badge status={t.status} /></td>
                                 <td style={styles.td}>
                                     {t.status !== "RESOLVED" ? (
-                                        <button style={styles.resolveBtn}>
+                                        <button style={styles.resolveBtn} onClick={() => handleResolve(t.id)}>
                                             Mark Resolved
                                         </button>
                                     ) : (

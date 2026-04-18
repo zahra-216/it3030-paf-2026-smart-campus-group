@@ -2,6 +2,7 @@ import StatCard from "../../components/ui/StatCard";
 import Badge from "../../components/ui/Badge";
 import { useAuth } from "../../context/AuthContext";
 import { useState, useEffect } from "react";
+import axios from "axios";
 
 const recentBookings = [
     { id: 1, resource: "Lecture Hall A", user: "Dr. Sarah Chen", date: "Apr 10, 2026", time: "09:00 - 11:00", status: "APPROVED" },
@@ -11,17 +12,24 @@ const recentBookings = [
     { id: 5, resource: "Auditorium", user: "Student Council", date: "Apr 12, 2026", time: "18:00 - 21:00", status: "REJECTED" },
 ];
 
-const tickets = [
-    { id: "TK-001", issue: "Projector malfunction in Hall C", priority: "HIGH", status: "OPEN", assignee: "Tech Team A" },
-    { id: "TK-002", issue: "AC not working - Lab 301", priority: "MEDIUM", status: "IN_PROGRESS", assignee: "John Doe" },
-    { id: "TK-003", issue: "Broken window - Room 105", priority: "LOW", status: "RESOLVED", assignee: "Maintenance" },
-    { id: "TK-004", issue: "Network issues - Library Wing", priority: "HIGH", status: "IN_PROGRESS", assignee: "IT Support" },
-];
-
 export default function AdminDashboard() {
     const { user } = useAuth(); 
 
     const [time, setTime] = useState(new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }));
+
+    const { token } = useAuth();
+    const [tickets, setTickets] = useState([]);
+    const [ticketLoading, setTicketLoading] = useState(true);
+
+    const [resourceCount, setResourceCount] = useState(0);
+
+    useEffect(() => {
+        axios.get("http://localhost:8081/api/resources", {
+            headers: { Authorization: `Bearer ${token}` }
+        })
+        .then(res => setResourceCount(res.data.length))
+        .catch(() => {});
+    }, [token]);
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -29,6 +37,15 @@ export default function AdminDashboard() {
         }, 1000);
         return () => clearInterval(interval);
     }, []);
+
+    useEffect(() => {
+        axios.get("http://localhost:8081/api/tickets/filter", {
+            headers: { Authorization: `Bearer ${token}` }
+        })
+        .then(res => setTickets(res.data))
+        .catch(() => setTickets([]))
+        .finally(() => setTicketLoading(false));
+    }, [token]);
 
     return (
         <div style={styles.page}>
@@ -54,9 +71,21 @@ export default function AdminDashboard() {
 
             {/* Stat Cards */}
             <div style={styles.statsRow}>
-                <StatCard label="Total Facilities" value="48" icon="🏛️" sub="+3 this month" subColor="#059669" />
+                <StatCard
+                    label="Total Facilities"
+                    value={String(resourceCount)}
+                    icon="🏛️"
+                    sub="Available resources"
+                    subColor="#059669"
+                />
                 <StatCard label="Active Bookings" value="124" icon="📅" sub="+12 today" subColor="#059669" />
-                <StatCard label="Open Tickets" value="18" icon="🔧" sub="5 high priority" subColor="#DC2626" />
+                <StatCard
+                    label="Open Tickets"
+                    value={String(tickets.filter(t => t.status === "OPEN").length)}
+                    icon="🔧"
+                    sub={`${tickets.filter(t => t.priority === "HIGH").length} high priority`}
+                    subColor="#DC2626"
+                />
                 <StatCard label="Pending Approvals" value="14" icon="⏳" sub="Awaiting review" subColor="#D97706" />
             </div>
 

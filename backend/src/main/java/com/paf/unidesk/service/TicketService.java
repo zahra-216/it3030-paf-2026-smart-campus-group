@@ -22,6 +22,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.paf.unidesk.service.NotificationService;
+import com.paf.unidesk.enums.NotificationType;
+import com.paf.unidesk.enums.Role;
+
 import java.io.File;
 import java.util.List;
 
@@ -34,6 +38,7 @@ public class TicketService {
     private final ResourceRepository resourceRepository;
     private final CommentRepository commentRepository;
     private final TicketAttachmentRepository ticketAttachmentRepository;
+    private final NotificationService notificationService;
 
     // ✅ CREATE TICKET
     public TicketResponse createTicket(TicketRequest request, Long userId) {
@@ -60,6 +65,18 @@ public class TicketService {
                 .build();
 
         Ticket saved = ticketRepository.save(ticket);
+
+        List<User> admins = userRepository.findAll().stream()
+        .filter(u -> u.getRole() == Role.ADMIN)
+        .toList();
+        for (User admin : admins) {
+            notificationService.createNotification(
+                    admin,
+                    "New ticket submitted: " + saved.getTitle(),
+                    NotificationType.TICKET,
+                    saved.getId()
+            );
+        }
 
         return mapToResponse(saved);
     }
@@ -200,6 +217,13 @@ public TicketResponse assignTicket(Long ticketId, Long userId, Long adminId) {
 
     ticketRepository.save(ticket);
 
+    notificationService.createNotification(
+        technician,
+        "You have been assigned to ticket: " + ticket.getTitle(),
+        NotificationType.TICKET,
+        ticket.getId()
+    );
+
     return mapToResponse(ticket);
 }
 
@@ -266,6 +290,24 @@ public TicketResponse technicianUpdateTicket(
                newStatus == TicketStatus.RESOLVED) {
 
         ticket.setStatus(newStatus);
+
+        List<User> admins = userRepository.findAll().stream()
+            .filter(u -> u.getRole() == Role.ADMIN)
+            .toList();
+        for (User admin : admins) {
+            notificationService.createNotification(
+                    admin,
+                    "Ticket resolved: " + ticket.getTitle() + ". Please review and close.",
+                    NotificationType.TICKET,
+                    ticket.getId()
+            );
+        }
+        notificationService.createNotification(
+                ticket.getCreatedBy(),
+                "Your ticket '" + ticket.getTitle() + "' has been resolved.",
+                NotificationType.TICKET,
+                ticket.getId()
+        );
 
     } else {
         throw new RuntimeException("Invalid technician status update");
@@ -473,6 +515,13 @@ public TicketResponse rejectTicket(Long ticketId, Long adminId, TicketRequest re
     ticket.setRejectionReason(request.getRejectionReason());
 
     ticketRepository.save(ticket);
+
+    notificationService.createNotification(
+        ticket.getCreatedBy(),
+        "Your ticket '" + ticket.getTitle() + "' has been rejected. Reason: " + request.getRejectionReason(),
+        NotificationType.TICKET,
+        ticket.getId()
+    );
 
     return mapToResponse(ticket);
 }
