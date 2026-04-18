@@ -11,6 +11,8 @@ export default function Badge({ status }) {
         HIGH:        { bg: "#FEE2E2", color: "#991B1B", label: "HIGH" },
         MEDIUM:      { bg: "#FEF3C7", color: "#92400E", label: "MEDIUM" },
         LOW:         { bg: "#D1FAE5", color: "#065F46", label: "LOW" },
+        ACTIVE:          { bg: "#D1FAE5", color: "#065F46", label: "ACTIVE" },
+        OUT_OF_SERVICE:  { bg: "#FEE2E2", color: "#991B1B", label: "OUT OF SERVICE" },
     };
 
     const c = config[status] || { bg: "#F3F4F6", color: "#374151", label: status };

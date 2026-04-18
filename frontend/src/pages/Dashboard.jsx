@@ -5,6 +5,7 @@ import AdminDashboard from "./dashboard/AdminDashboard";
 import UserDashboard from "./dashboard/UserDashboard";
 import NotificationsPage from "./NotificationsPage";
 import UsersAndRolesPage from "./UsersAndRolesPage";
+import ResourcesPage from "./ResourcesPage";
 
 export default function Dashboard() {
     const { user } = useAuth();
@@ -18,6 +19,8 @@ export default function Dashboard() {
                 return <NotificationsPage />;
             case "users":
                 return <UsersAndRolesPage />;
+            case "resources":
+                return <ResourcesPage />;
             default:
                 return (
                     <div style={styles.empty}>
