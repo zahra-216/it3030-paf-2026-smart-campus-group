@@ -1,11 +1,9 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import Badge from "../components/ui/Badge";
+import { ResourceType, ResourceStatus } from "../constants/enums";
 
 const API_BASE = "http://localhost:8081/api/resources";
-
-const RESOURCE_TYPES = ["LAB", "LECTURE_HALL", "MEETING_ROOM", "EQUIPMENT"];
-const RESOURCE_STATUSES = ["ACTIVE", "OUT_OF_SERVICE"];
 
 export default function ResourcesPage() {
     const { token } = useAuth();
@@ -26,13 +24,12 @@ export default function ResourcesPage() {
     const [showModal, setShowModal] = useState(false);
     const [editingResource, setEditingResource] = useState(null);
     const [form, setForm] = useState({
-        name: "", type: "LAB", capacity: "", location: "",
-        status: "ACTIVE", availableFrom: "08:00", availableUntil: "18:00",
+        name: "", type: ResourceType.LAB, capacity: "", location: "",
+        status: ResourceStatus.ACTIVE, availableFrom: "08:00", availableUntil: "18:00",
     });
     const [submitting, setSubmitting] = useState(false);
     const [deleteConfirmId, setDeleteConfirmId] = useState(null);
 
-    // ── Fetch resources ───────────────────────────────────────────────
     const fetchResources = async () => {
         setLoading(true);
         setError(null);
@@ -58,10 +55,9 @@ export default function ResourcesPage() {
 
     useEffect(() => { fetchResources(); }, [filterType, filterStatus, filterLocation, filterCapacity]);
 
-    // ── Create / Update ───────────────────────────────────────────────
     const openCreateModal = () => {
         setEditingResource(null);
-        setForm({ name: "", type: "LAB", capacity: "", location: "", status: "ACTIVE", availableFrom: "08:00", availableUntil: "18:00" });
+        setForm({ name: "", type: ResourceType.LAB, capacity: "", location: "", status: ResourceStatus.ACTIVE, availableFrom: "08:00", availableUntil: "18:00" });
         setShowModal(true);
     };
 
@@ -103,7 +99,6 @@ export default function ResourcesPage() {
         }
     };
 
-    // ── Delete ────────────────────────────────────────────────────────
     const handleDelete = async (id) => {
         try {
             const res = await fetch(`${API_BASE}/${id}`, {
@@ -118,7 +113,6 @@ export default function ResourcesPage() {
         }
     };
 
-    // ── Render ────────────────────────────────────────────────────────
     return (
         <div style={styles.page}>
 
@@ -141,11 +135,15 @@ export default function ResourcesPage() {
             <div style={styles.filtersCard}>
                 <select style={styles.select} value={filterType} onChange={e => setFilterType(e.target.value)}>
                     <option value="">All Types</option>
-                    {RESOURCE_TYPES.map(t => <option key={t} value={t}>{t.replace("_", " ")}</option>)}
+                    {Object.values(ResourceType).map(t => (
+                        <option key={t} value={t}>{t.replace(/_/g, " ")}</option>
+                    ))}
                 </select>
                 <select style={styles.select} value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
                     <option value="">All Statuses</option>
-                    {RESOURCE_STATUSES.map(s => <option key={s} value={s}>{s.replace("_", " ")}</option>)}
+                    {Object.values(ResourceStatus).map(s => (
+                        <option key={s} value={s}>{s.replace(/_/g, " ")}</option>
+                    ))}
                 </select>
                 <input
                     style={styles.input}
@@ -187,7 +185,7 @@ export default function ResourcesPage() {
                                 <Badge status={r.status} />
                             </div>
                             <p style={styles.resourceName}>{r.name}</p>
-                            <p style={styles.resourceType}>{r.type?.replace("_", " ")}</p>
+                            <p style={styles.resourceType}>{r.type?.replace(/_/g, " ")}</p>
 
                             <div style={styles.metaList}>
                                 <div style={styles.metaRow}>
@@ -200,10 +198,11 @@ export default function ResourcesPage() {
                                 </div>
                                 <div style={styles.metaRow}>
                                     <span style={styles.metaIcon}>🕐</span>
-                                    <span style={{...styles.metaText,
-                                        color: r.status === "OUT_OF_SERVICE" ? "#DC2626" : "#6B7280"
-                                        }}>
-                                    {r.status === "OUT_OF_SERVICE" ? "Unavailable" : `${r.availableFrom} – ${r.availableUntil}`}
+                                    <span style={{
+                                        ...styles.metaText,
+                                        color: r.status === ResourceStatus.OUT_OF_SERVICE ? "#DC2626" : "#6B7280"
+                                    }}>
+                                        {r.status === ResourceStatus.OUT_OF_SERVICE ? "Unavailable" : `${r.availableFrom} – ${r.availableUntil}`}
                                     </span>
                                 </div>
                             </div>
@@ -236,7 +235,9 @@ export default function ResourcesPage() {
                             <div style={styles.formGroup}>
                                 <label style={styles.label}>Type *</label>
                                 <select style={styles.formInput} value={form.type} onChange={e => setForm({ ...form, type: e.target.value })}>
-                                    {RESOURCE_TYPES.map(t => <option key={t} value={t}>{t.replace("_", " ")}</option>)}
+                                    {Object.values(ResourceType).map(t => (
+                                        <option key={t} value={t}>{t.replace(/_/g, " ")}</option>
+                                    ))}
                                 </select>
                             </div>
                             <div style={styles.formGroup}>
@@ -250,20 +251,22 @@ export default function ResourcesPage() {
                             <div style={styles.formGroup}>
                                 <label style={styles.label}>Status *</label>
                                 <select style={styles.formInput} value={form.status} onChange={e => setForm({ ...form, status: e.target.value })}>
-                                    {RESOURCE_STATUSES.map(s => <option key={s} value={s}>{s.replace("_", " ")}</option>)}
+                                    {Object.values(ResourceStatus).map(s => (
+                                        <option key={s} value={s}>{s.replace(/_/g, " ")}</option>
+                                    ))}
                                 </select>
                             </div>
-                            {form.status !== "OUT_OF_SERVICE" && (
+                            {form.status !== ResourceStatus.OUT_OF_SERVICE && (
                                 <>
-                            <div style={styles.formGroup}>
-                                <label style={styles.label}>Available From</label>
-                                <input style={styles.formInput} type="time" value={form.availableFrom} onChange={e => setForm({ ...form, availableFrom: e.target.value })} />
-                            </div>
-                            <div style={styles.formGroup}>
-                                <label style={styles.label}>Available Until</label>
-                                <input style={styles.formInput} type="time" value={form.availableUntil} onChange={e => setForm({ ...form, availableUntil: e.target.value })} />
-                            </div>
-                            </>
+                                    <div style={styles.formGroup}>
+                                        <label style={styles.label}>Available From</label>
+                                        <input style={styles.formInput} type="time" value={form.availableFrom} onChange={e => setForm({ ...form, availableFrom: e.target.value })} />
+                                    </div>
+                                    <div style={styles.formGroup}>
+                                        <label style={styles.label}>Available Until</label>
+                                        <input style={styles.formInput} type="time" value={form.availableUntil} onChange={e => setForm({ ...form, availableUntil: e.target.value })} />
+                                    </div>
+                                </>
                             )}
                         </div>
 
@@ -300,17 +303,16 @@ export default function ResourcesPage() {
 
 function typeIcon(type) {
     switch (type) {
-        case "LAB": return "🔬";
-        case "LECTURE_HALL": return "🏛️";
-        case "MEETING_ROOM": return "🤝";
-        case "EQUIPMENT": return "📷";
+        case ResourceType.LAB: return "🔬";
+        case ResourceType.LECTURE_HALL: return "🏛️";
+        case ResourceType.MEETING_ROOM: return "🤝";
+        case ResourceType.EQUIPMENT: return "📷";
         default: return "🏢";
     }
 }
 
 const styles = {
     page: { display: "flex", flexDirection: "column", gap: "1.25rem" },
-
     header: { display: "flex", alignItems: "flex-start", justifyContent: "space-between" },
     title: { fontFamily: "var(--font-heading)", fontSize: "1.5rem", fontWeight: 700, color: "#111827", marginBottom: 4 },
     subtitle: { fontSize: "0.875rem", color: "#6B7280" },
@@ -320,7 +322,6 @@ const styles = {
         fontSize: "0.875rem", fontWeight: 600, cursor: "pointer",
         fontFamily: "var(--font-body)",
     },
-
     filtersCard: {
         backgroundColor: "#fff", borderRadius: 14,
         padding: "1rem 1.25rem", border: "1px solid #E5E7EB",
@@ -344,9 +345,7 @@ const styles = {
         fontFamily: "var(--font-body)", color: "#6B7280",
         backgroundColor: "#fff", cursor: "pointer",
     },
-
     grid: { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 },
-
     card: {
         backgroundColor: "#fff", borderRadius: 14,
         padding: "1.25rem", border: "1px solid #E5E7EB",
@@ -360,12 +359,10 @@ const styles = {
     },
     resourceName: { fontSize: "0.95rem", fontWeight: 700, color: "#111827", fontFamily: "var(--font-heading)" },
     resourceType: { fontSize: "0.75rem", fontWeight: 600, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.05em" },
-
     metaList: { display: "flex", flexDirection: "column", gap: 5, marginTop: 4 },
     metaRow: { display: "flex", alignItems: "center", gap: 6 },
     metaIcon: { fontSize: "0.8rem" },
     metaText: { fontSize: "0.8rem", color: "#6B7280" },
-
     cardActions: { display: "flex", gap: 8, marginTop: 8 },
     editBtn: {
         flex: 1, padding: "0.45rem", borderRadius: 7,
@@ -379,7 +376,6 @@ const styles = {
         fontSize: "0.8rem", fontWeight: 600, color: "#DC2626",
         cursor: "pointer", fontFamily: "var(--font-body)",
     },
-
     center: { display: "flex", justifyContent: "center", padding: "3rem" },
     emptyCard: {
         backgroundColor: "#fff", borderRadius: 14,
@@ -388,7 +384,6 @@ const styles = {
     },
     emptyTitle: { fontWeight: 700, fontSize: "1rem", color: "#111827", marginBottom: 4, fontFamily: "var(--font-heading)" },
     hint: { fontSize: "0.85rem", color: "#6B7280" },
-
     overlay: {
         position: "fixed", inset: 0,
         backgroundColor: "rgba(0,0,0,0.4)",
@@ -403,7 +398,6 @@ const styles = {
     modalHeader: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem" },
     modalTitle: { fontFamily: "var(--font-heading)", fontSize: "1.1rem", fontWeight: 700, color: "#111827" },
     closeBtn: { background: "none", border: "none", fontSize: "1rem", color: "#9CA3AF", cursor: "pointer" },
-
     formGrid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" },
     formGroup: { display: "flex", flexDirection: "column", gap: 5 },
     label: { fontSize: "0.78rem", fontWeight: 600, color: "#374151" },
@@ -413,7 +407,6 @@ const styles = {
         fontFamily: "var(--font-body)", color: "#111827",
         outline: "none", backgroundColor: "#F9FAFB",
     },
-
     modalFooter: { display: "flex", justifyContent: "flex-end", gap: 10, marginTop: "1.5rem" },
     cancelBtn: {
         padding: "0.6rem 1.25rem", borderRadius: 8,
