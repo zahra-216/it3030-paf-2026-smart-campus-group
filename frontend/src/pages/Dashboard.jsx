@@ -6,6 +6,7 @@ import UserDashboard from "./dashboard/UserDashboard";
 import NotificationsPage from "./NotificationsPage";
 import UsersAndRolesPage from "./UsersAndRolesPage";
 import ResourcesPage from "./ResourcesPage";
+import TechnicianDashboard from "./dashboard/TechnicianDashboard";
 
 export default function Dashboard() {
     const { user } = useAuth();
@@ -14,7 +15,9 @@ export default function Dashboard() {
     const renderPage = () => {
         switch (activePage) {
             case "dashboard":
-                return user?.role === "ADMIN" ? <AdminDashboard /> : <UserDashboard />;
+                if (user?.role === "ADMIN") return <AdminDashboard />;
+                if (user?.role === "TECHNICIAN") return <TechnicianDashboard />;
+                return <UserDashboard />;
             case "notifications":
                 return <NotificationsPage />;
             case "users":

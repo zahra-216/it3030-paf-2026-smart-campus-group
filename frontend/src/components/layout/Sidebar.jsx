@@ -33,10 +33,25 @@ const userMenu = [
     }
 ];
 
+const technicianMenu = [
+    {
+        group: "MAIN MENU",
+        items: [
+            { id: "dashboard", label: "Dashboard", icon: DashIcon },
+            { id: "tickets", label: "My Tickets", icon: MaintIcon },
+            { id: "notifications", label: "Notifications", icon: NotifIcon },
+        ]
+    }
+];
+
 export default function Sidebar({ activePage, setActivePage }) {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
-    const menu = user?.role === "ADMIN" ? adminMenu : userMenu;
+    const menu = user?.role === "ADMIN"
+    ? adminMenu
+    : user?.role === "TECHNICIAN"
+    ? technicianMenu
+    : userMenu;
 
     return (
         <aside style={styles.sidebar}>

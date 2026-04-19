@@ -8,9 +8,9 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (!loading && user) {
-      navigate(user.isProfileComplete ? "/dashboard" : "/complete-profile");
+      navigate("/dashboard");
     }
-  }, [user, loading]);
+  }, [user, loading, navigate]);
 
   const handleGoogleLogin = () => {
     window.location.href = "http://localhost:8081/oauth2/authorization/google";
