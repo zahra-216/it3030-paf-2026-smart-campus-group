@@ -15,7 +15,7 @@ public class BookingService {
     @Autowired
     private BookingRepository bookingRepository;
 
-    // ✅ Create booking with full validation
+    // ✅ Create booking with validation + smart conflict message
     public Booking createBooking(Booking booking) {
 
         // 🔴 Null validations
@@ -40,12 +40,12 @@ public class BookingService {
             throw new RuntimeException("End time must be after start time");
         }
 
-        // 🔴 Prevent past booking (🔥 extra marks)
+        // 🔴 Prevent past booking
         if (booking.getDate().isBefore(java.time.LocalDate.now())) {
             throw new RuntimeException("Cannot book for past dates");
         }
 
-        // 🔴 Conflict check
+        // 🔴 Conflict check (UPDATED 🔥)
         List<Booking> conflicts = bookingRepository
                 .findByResourceAndDateAndStartTimeLessThanAndEndTimeGreaterThan(
                         booking.getResource(),
@@ -55,13 +55,43 @@ public class BookingService {
                 );
 
         if (!conflicts.isEmpty()) {
-            throw new RuntimeException("Booking conflict! Time slot already taken.");
+            Booking conflict = conflicts.get(0);
+
+            throw new RuntimeException(
+                    "Resource is INACTIVE from " +
+                            conflict.getStartTime() + " to " +
+                            conflict.getEndTime() +
+                            ". It becomes ACTIVE after that time."
+            );
         }
 
         // 🔴 Default status
         booking.setStatus(BookingStatus.PENDING);
 
         return bookingRepository.save(booking);
+    }
+
+    // ✅ NEW METHOD (🔥 MAIN FEATURE)
+    public String getResourceStatusForTime(Booking booking) {
+
+        List<Booking> conflicts = bookingRepository
+                .findByResourceAndDateAndStartTimeLessThanAndEndTimeGreaterThan(
+                        booking.getResource(),
+                        booking.getDate(),
+                        booking.getEndTime(),
+                        booking.getStartTime()
+                );
+
+        if (!conflicts.isEmpty()) {
+            Booking conflict = conflicts.get(0);
+
+            return "INACTIVE from " +
+                    conflict.getStartTime() + " to " +
+                    conflict.getEndTime() +
+                    ", ACTIVE after that";
+        }
+
+        return "ACTIVE";
     }
 
     // ✅ Get all bookings

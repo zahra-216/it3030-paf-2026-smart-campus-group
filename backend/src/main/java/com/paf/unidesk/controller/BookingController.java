@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import com.paf.unidesk.enums.BookingStatus;
 import com.paf.unidesk.model.Booking;
 import com.paf.unidesk.service.BookingService;
+
 @RestController
 @RequestMapping("/api/bookings")
 @CrossOrigin
@@ -20,6 +21,12 @@ public class BookingController {
     @PostMapping
     public Booking createBooking(@RequestBody Booking booking) {
         return bookingService.createBooking(booking);
+    }
+
+    // ✅ NEW: Check availability before booking (🔥)
+    @PostMapping("/check")
+    public String checkAvailability(@RequestBody Booking booking) {
+        return bookingService.getResourceStatusForTime(booking);
     }
 
     // ✅ Get all bookings
