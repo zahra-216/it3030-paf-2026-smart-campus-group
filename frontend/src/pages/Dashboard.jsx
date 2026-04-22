@@ -6,7 +6,8 @@ import UserDashboard from "./dashboard/UserDashboard";
 import NotificationsPage from "./NotificationsPage";
 import UsersAndRolesPage from "./UsersAndRolesPage";
 import AdminResourcesPage from "./AdminResourcesPage";
-import UserResourcesPage from "./UserResourcesPage";
+import UserAdminResourcesPage from "./AdminResourcesPage";
+import UserResourcesPage from "./UserUserResourcesPage";
 import TechnicianDashboard from "./dashboard/TechnicianDashboard";
 import TicketsPage from "./TicketsPage";
 
@@ -15,6 +16,8 @@ import BookingsPage from "./BookingsPage";
 export default function Dashboard() {
     const { user } = useAuth();
     const [activePage, setActivePage] = useState("dashboard");
+
+    const isAdmin = user?.role === "ADMIN";
 
     const isAdmin = user?.role === "ADMIN";
 
@@ -28,6 +31,8 @@ export default function Dashboard() {
                 return isAdmin ? <AdminResourcesPage /> : <UserResourcesPage />;
            case "bookings":
                return <BookingsPage setActivePage={setActivePage} />;
+            case "resources":
+                return isAdmin ? <AdminResourcesPage /> : <UserResourcesPage />;
             case "notifications":
                 return <NotificationsPage />;
             case "users":
