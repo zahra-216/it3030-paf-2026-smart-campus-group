@@ -1,9 +1,9 @@
-import { Routes, Route, Navigate } from "react-router-dom";
-import LoginPage from "./pages/LoginPage";
-import OAuthCallback from "./pages/OAuthCallback";
-import Dashboard from "./pages/Dashboard";
-import TicketsPage from "./pages/TicketsPage";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { useAuth } from "./context/AuthContext";
 
+import LoginPage from "./pages/LoginPage";
+import Dashboard from "./pages/Dashboard";
+import OAuthCallback from "./pages/OAuthCallback";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 

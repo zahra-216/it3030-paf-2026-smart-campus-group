@@ -10,6 +10,7 @@ import UserResourcesPage from "./UserResourcesPage";
 import TechnicianDashboard from "./dashboard/TechnicianDashboard";
 import TicketsPage from "./TicketsPage";
 
+import BookingsPage from "./BookingsPage";
 
 export default function Dashboard() {
     const { user } = useAuth();
@@ -25,6 +26,8 @@ export default function Dashboard() {
                 return <UserDashboard />;
             case "resources":
                 return isAdmin ? <AdminResourcesPage /> : <UserResourcesPage />;
+           case "bookings":
+               return <BookingsPage setActivePage={setActivePage} />;
             case "notifications":
                 return <NotificationsPage />;
             case "users":
@@ -47,6 +50,7 @@ export default function Dashboard() {
             {renderPage()}
         </PageLayout>
     );
+
 }
 
 const styles = {
