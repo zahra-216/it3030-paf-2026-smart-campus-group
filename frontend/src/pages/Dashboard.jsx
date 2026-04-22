@@ -7,10 +7,11 @@ import NotificationsPage from "./NotificationsPage";
 import UsersAndRolesPage from "./UsersAndRolesPage";
 import ResourcesPage from "./ResourcesPage";
 import TechnicianDashboard from "./dashboard/TechnicianDashboard";
+import BookingsPage from "./BookingsPage";
 
 export default function Dashboard() {
     const { user } = useAuth();
-    const [activePage, setActivePage] = useState("dashboard");
+    const [activePage, setActivePage] = useState("bookings");
 
     const renderPage = () => {
         switch (activePage) {
@@ -18,6 +19,8 @@ export default function Dashboard() {
                 if (user?.role === "ADMIN") return <AdminDashboard />;
                 if (user?.role === "TECHNICIAN") return <TechnicianDashboard />;
                 return <UserDashboard />;
+           case "bookings":
+               return <BookingsPage setActivePage={setActivePage} />;
             case "notifications":
                 return <NotificationsPage />;
             case "users":
@@ -40,6 +43,7 @@ export default function Dashboard() {
             {renderPage()}
         </PageLayout>
     );
+
 }
 
 const styles = {
