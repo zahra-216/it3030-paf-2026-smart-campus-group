@@ -2,7 +2,10 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
 import OAuthCallback from "./pages/OAuthCallback";
 import Dashboard from "./pages/Dashboard";
+import TicketsPage from "./pages/TicketsPage";
+
 import ProtectedRoute from "./components/ProtectedRoute";
+
 
 function App() {
     return (
@@ -17,8 +20,9 @@ function App() {
                     </ProtectedRoute>
                 }
             />
+
             <Route path="/" element={<Navigate to="/login" />} />
-	        <Route path="*" element={<Navigate to="/login" />} />
+	        <Route path="*" element={<Navigate to="/login" />} />            
         </Routes>
     );
 }
