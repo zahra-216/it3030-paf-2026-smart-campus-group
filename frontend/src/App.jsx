@@ -4,6 +4,7 @@ import { useAuth } from "./context/AuthContext";
 import LoginPage from "./pages/LoginPage";
 import Dashboard from "./pages/Dashboard";
 import OAuthCallback from "./pages/OAuthCallback";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -17,20 +18,34 @@ function App() {
 
   return (
     <Router>
-        <ToastContainer position="top-right" autoClose={3000} />
+      <ToastContainer position="top-right" autoClose={3000} />
+
       <Routes>
 
         {/* LOGIN */}
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route
+          path="/login"
+          element={user ? <Navigate to="/dashboard" /> : <LoginPage />}
+        />
 
-        {/* DASHBOARD */}
-        <Route path="/dashboard" element={<Dashboard />} />
+        {/* DASHBOARD (PROTECTED) */}
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
 
         {/* OAUTH CALLBACK */}
         <Route path="/oauth2/callback" element={<OAuthCallback />} />
 
-        {/* DEFAULT FIXED */}
-        <Route path="*" element={<Navigate to="/dashboard" />} />
+        {/* DEFAULT ROUTE (SMART) */}
+        <Route
+          path="*"
+          element={<Navigate to={user ? "/dashboard" : "/login"} />}
+        />
 
       </Routes>
     </Router>

@@ -11,7 +11,7 @@ import BookingsPage from "./BookingsPage";
 
 export default function Dashboard() {
     const { user } = useAuth();
-    const [activePage, setActivePage] = useState("bookings");
+    const [activePage, setActivePage] = useState("dashboard");
 
     const renderPage = () => {
         switch (activePage) {
