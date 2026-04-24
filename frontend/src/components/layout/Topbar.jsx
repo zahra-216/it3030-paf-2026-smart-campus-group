@@ -3,10 +3,35 @@ import { useAuth } from "../../context/AuthContext";
 import axios from "axios";
 
 export default function Topbar() {
+    function getTimeAgo(dateStr) {
+        if (!dateStr) return "";
+        const diff = Date.now() - new Date(dateStr).getTime();
+        const mins = Math.floor(diff / 60000);
+        const hours = Math.floor(diff / 3600000);
+        const days = Math.floor(diff / 86400000);
+        if (mins < 1) return "Just now";
+        if (mins < 60) return `${mins}m ago`;
+        if (hours < 24) return `${hours}h ago`;
+        return `${days}d ago`;
+    }
     const { user, token } = useAuth();
     const [notifOpen, setNotifOpen] = useState(false);
     const [unreadCount, setUnreadCount] = useState(0);
     const notifRef = useRef(null);
+    const [notifications, setNotifications] = useState([]);
+
+    useEffect(() => {
+        if (token) {
+            axios.get("http://localhost:8081/api/notifications/unread", {
+                headers: { Authorization: `Bearer ${token}` }
+            })
+            .then(res => {
+                setUnreadCount(res.data.length);
+                setNotifications(res.data);
+            })
+            .catch(() => {});
+        }
+    }, [token]);
 
     useEffect(() => {
         if (token) {
@@ -45,17 +70,31 @@ export default function Topbar() {
                         {unreadCount > 0 && <span style={styles.badge}>{unreadCount}</span>}
                     </button>
 
-                    {notifOpen && (
+                   {notifOpen && (
                         <div style={styles.dropdown}>
                             <div style={styles.dropHead}>
                                 <span style={styles.dropTitle}>Notifications</span>
                                 <button style={styles.markAll}>Mark all read</button>
                             </div>
-                            <div style={styles.dropEmpty}>
-                                <p style={{ fontSize: "1.5rem", marginBottom: 6 }}>🔔</p>
-                                <p style={{ fontWeight: 600, fontSize: "0.85rem", color: "#111827" }}>All caught up!</p>
-                                <p style={{ fontSize: "0.75rem", color: "#6B7280", marginTop: 2 }}>No new notifications</p>
-                            </div>
+                            {notifications.length === 0 ? (
+                                <div style={styles.dropEmpty}>
+                                    <p style={{ fontSize: "1.5rem", marginBottom: 6 }}>🔔</p>
+                                    <p style={{ fontWeight: 600, fontSize: "0.85rem", color: "var(--color-text)" }}>All caught up!</p>
+                                    <p style={{ fontSize: "0.75rem", color: "var(--color-text-light)", marginTop: 2 }}>No new notifications</p>
+                                </div>
+                            ) : (
+                                <div style={{ maxHeight: 300, overflowY: "auto" }}>
+                                    {notifications.slice(0, 5).map(n => (
+                                        <div key={n.id} style={styles.notifItem}>
+                                            <span style={styles.notifDot} />
+                                            <div>
+                                                <p style={styles.notifMsg}>{n.message}</p>
+                                                <p style={styles.notifTime}>{getTimeAgo(n.createdAt)}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
@@ -91,6 +130,34 @@ export default function Topbar() {
 }
 
 const styles = {
+    notifItem: {
+        display: "flex",
+        alignItems: "flex-start",
+        gap: 10,
+        padding: "10px 16px",
+        borderBottom: "1px solid var(--color-border)",
+        cursor: "pointer",
+    },
+    notifDot: {
+        width: 8,
+        height: 8,
+        borderRadius: "50%",
+        backgroundColor: "var(--color-primary)",
+        flexShrink: 0,
+        marginTop: 5,
+    },
+    notifMsg: {
+        fontSize: "0.78rem",
+        color: "var(--color-text)",
+        lineHeight: 1.4,
+        fontWeight: 500,
+    },
+    notifTime: {
+        fontSize: "0.68rem",
+        color: "var(--color-text-light)",
+        marginTop: 2,
+    },
+
     topbar: {
         height: 56,
         backgroundColor: "#fff",

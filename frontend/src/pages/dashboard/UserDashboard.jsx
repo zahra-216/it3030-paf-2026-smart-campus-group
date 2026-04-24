@@ -4,17 +4,6 @@ import StatCard from "../../components/ui/StatCard";
 import Badge from "../../components/ui/Badge";
 import axios from "axios";
 
-const myBookings = [
-    { id: 1, resource: "Computer Lab B", date: "Apr 11, 2026", time: "13:00 - 15:00", status: "PENDING" },
-    { id: 2, resource: "Meeting Room 204", date: "Apr 12, 2026", time: "10:00 - 11:30", status: "APPROVED" },
-    { id: 3, resource: "Lecture Hall A", date: "Apr 14, 2026", time: "09:00 - 11:00", status: "APPROVED" },
-];
-
-const myTickets = [
-    { id: "TK-012", issue: "Broken chair in Lab 201", priority: "LOW", status: "OPEN" },
-    { id: "TK-008", issue: "AC not cooling in Room 305", priority: "MEDIUM", status: "IN_PROGRESS" },
-];
-
 export default function UserDashboard() {
     const [time, setTime] = useState(new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }));
 
@@ -40,6 +29,7 @@ export default function UserDashboard() {
     }, [token]);
 
     const [myTickets, setMyTickets] = useState([]);
+    const [myBookings, setMyBookings] = useState([]);
     const [resourceCount, setResourceCount] = useState(0);
 
     useEffect(() => {
@@ -50,6 +40,17 @@ export default function UserDashboard() {
             })
             .then(res => setMyTickets(res.data))
             .catch(() => setMyTickets([]));
+
+            // fetch my bookings
+            axios.get("http://localhost:8081/api/bookings", {
+                headers: { Authorization: `Bearer ${token}` }
+            })
+            .then(res => {
+                // filter only current user's bookings
+                const userBookings = res.data.filter(b => b.user?.id === user.id);
+                setMyBookings(userBookings);
+            })
+            .catch(() => setMyBookings([]));
 
             // fetch resources count
             axios.get("http://localhost:8081/api/resources", {
@@ -107,9 +108,9 @@ export default function UserDashboard() {
             <div style={styles.statsRow}>
                 <StatCard
                     label="My Bookings"
-                    value="0"
+                    value={String(myBookings.length)}
                     icon="📅"
-                    sub="Coming soon"
+                    sub={`${myBookings.filter(b => b.status === "PENDING").length} pending`}
                     subColor="#059669"
                 />
                 <StatCard
@@ -164,12 +165,16 @@ export default function UserDashboard() {
                         <h2 style={styles.cardTitle}>My Bookings</h2>
                         <button style={styles.viewAll}>View All</button>
                     </div>
-                    {myBookings.map(b => (
+                    {myBookings.length === 0 ? (
+                        <div style={styles.empty}>
+                            <p>No bookings yet</p>
+                        </div>
+                    ) : myBookings.map(b => (
                         <div key={b.id} style={styles.row}>
                             <div style={styles.rowIcon}>📅</div>
                             <div style={styles.rowInfo}>
-                                <p style={styles.rowName}>{b.resource}</p>
-                                <p style={styles.rowMeta}>{b.date} · {b.time}</p>
+                                <p style={styles.rowName}>{b.resource?.name || "Resource"}</p>
+                                <p style={styles.rowMeta}>{b.date} · {b.startTime} - {b.endTime}</p>
                             </div>
                             <Badge status={b.status} />
                         </div>

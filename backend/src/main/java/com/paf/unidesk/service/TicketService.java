@@ -22,9 +22,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.paf.unidesk.service.NotificationService;
 import com.paf.unidesk.enums.NotificationType;
-import com.paf.unidesk.enums.Role;
 
 import java.io.File;
 import java.util.List;
