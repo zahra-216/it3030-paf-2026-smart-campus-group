@@ -43,7 +43,7 @@ export default function AdminDashboard() {
         axios.get("http://localhost:8081/api/tickets/filter", {
             headers: { Authorization: `Bearer ${token}` }
         })
-        .then(res => setTickets(res.data))
+        .then(res => setTickets(Array.isArray(res.data) ? res.data : res.data.content ?? []))
         .catch(() => setTickets([]))
         .finally(() => setTicketLoading(false));
     }, [token]);

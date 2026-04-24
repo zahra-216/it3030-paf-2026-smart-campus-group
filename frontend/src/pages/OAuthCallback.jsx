@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import { useAuth } from "../context/AuthContext";
 
 export default function OAuthCallback() {
@@ -16,23 +15,13 @@ export default function OAuthCallback() {
             return;
         }
 
-        // Save token to localStorage directly
-        localStorage.setItem("token", token);
+        // ✅ Only this is needed
         login(token);
 
-        // Fetch user with token directly
-        axios.get("http://localhost:8081/api/auth/me", {
-            headers: { Authorization: `Bearer ${token}` }
-        })
-        .then((response) => {
-            const user = response.data;
-                navigate("/dashboard");
-        })
-        .catch((error) => {
-            console.error("Error fetching user:", error);
-            localStorage.removeItem("token");
-            navigate("/login");
-        });
+        // ⏳ Give AuthContext time to fetch user
+        setTimeout(() => {
+            navigate("/dashboard");
+        }, 500);
 
     }, []);
 
