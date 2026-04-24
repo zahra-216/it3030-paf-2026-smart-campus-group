@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.paf.unidesk.enums.BookingStatus;
+import com.paf.unidesk.enums.NotificationType;
 import com.paf.unidesk.model.Booking;
 import com.paf.unidesk.repository.BookingRepository;
 
@@ -14,6 +15,9 @@ public class BookingService {
 
     @Autowired
     private BookingRepository bookingRepository;
+
+    @Autowired
+    private NotificationService notificationService;
 
     // ✅ Create booking with validation + smart conflict message
     public Booking createBooking(Booking booking) {
@@ -119,7 +123,16 @@ public class BookingService {
         }
 
         booking.setStatus(BookingStatus.APPROVED);
-        return bookingRepository.save(booking);
+        Booking saved = bookingRepository.save(booking);
+
+        notificationService.createNotification(
+            booking.getUser(),
+            "Your booking for " + booking.getResource().getName() + " on " + booking.getDate() + " has been approved.",
+            NotificationType.BOOKING,
+            booking.getId()
+        );
+
+        return saved;
     }
 
     // ✅ Reject booking
@@ -133,7 +146,16 @@ public class BookingService {
         booking.setStatus(BookingStatus.REJECTED);
         booking.setRejectionReason(reason);
 
-        return bookingRepository.save(booking);
+        Booking saved = bookingRepository.save(booking);
+
+        notificationService.createNotification(
+            booking.getUser(),
+            "Your booking for " + booking.getResource().getName() + " has been rejected. Reason: " + reason,
+            NotificationType.BOOKING,
+            booking.getId()
+        );
+
+        return saved;
     }
 
     // ✅ Delete booking

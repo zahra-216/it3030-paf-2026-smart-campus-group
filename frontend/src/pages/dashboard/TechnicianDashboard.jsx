@@ -4,13 +4,6 @@ import StatCard from "../../components/ui/StatCard";
 import Badge from "../../components/ui/Badge";
 import axios from "axios";
 
-const myTickets = [
-    { id: "TK-001", issue: "Projector malfunction in Hall C", priority: "HIGH", status: "OPEN", location: "Hall C", category: "EQUIPMENT" },
-    { id: "TK-002", issue: "AC not working - Lab 301", priority: "MEDIUM", status: "IN_PROGRESS", location: "Lab 301", category: "ELECTRICAL" },
-    { id: "TK-003", issue: "Broken window - Room 105", priority: "LOW", status: "IN_PROGRESS", location: "Room 105", category: "FURNITURE" },
-    { id: "TK-004", issue: "Network issues - Library Wing", priority: "HIGH", status: "OPEN", location: "Library", category: "EQUIPMENT" },
-];
-
 export default function TechnicianDashboard() {
     const { user, token } = useAuth();
 

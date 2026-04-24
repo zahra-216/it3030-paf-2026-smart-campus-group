@@ -4,22 +4,13 @@ import { useAuth } from "../../context/AuthContext";
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-const recentBookings = [
-    { id: 1, resource: "Lecture Hall A", user: "Dr. Sarah Chen", date: "Apr 10, 2026", time: "09:00 - 11:00", status: "APPROVED" },
-    { id: 2, resource: "Lab Equipment - Projector #3", user: "James Wilson", date: "Apr 10, 2026", time: "14:00 - 16:00", status: "PENDING" },
-    { id: 3, resource: "Meeting Room 204", user: "Prof. Kumar", date: "Apr 11, 2026", time: "10:00 - 11:30", status: "APPROVED" },
-    { id: 4, resource: "Computer Lab B", user: "Lisa Anderson", date: "Apr 11, 2026", time: "13:00 - 15:00", status: "PENDING" },
-    { id: 5, resource: "Auditorium", user: "Student Council", date: "Apr 12, 2026", time: "18:00 - 21:00", status: "REJECTED" },
-];
-
 export default function AdminDashboard() {
     const { user } = useAuth(); 
-
     const [time, setTime] = useState(new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }));
-
     const { token } = useAuth();
     const [tickets, setTickets] = useState([]);
     const [ticketLoading, setTicketLoading] = useState(true);
+    const [bookings, setBookings] = useState([]);
 
     const [resourceCount, setResourceCount] = useState(0);
 
@@ -37,6 +28,14 @@ export default function AdminDashboard() {
         }, 1000);
         return () => clearInterval(interval);
     }, []);
+
+    useEffect(() => {
+        axios.get("http://localhost:8081/api/bookings", {
+            headers: { Authorization: `Bearer ${token}` }
+        })
+        .then(res => setBookings(res.data))
+        .catch(() => setBookings([]));
+    }, [token]);
 
     useEffect(() => {
         axios.get("http://localhost:8081/api/tickets/filter", {
@@ -78,7 +77,13 @@ export default function AdminDashboard() {
                     sub="Available resources"
                     subColor="#059669"
                 />
-                <StatCard label="Active Bookings" value="124" icon="📅" sub="+12 today" subColor="#059669" />
+                <StatCard
+                    label="Active Bookings"
+                    value={String(bookings.filter(b => b.status === "APPROVED").length)}
+                    icon="📅"
+                    sub="Total approved"
+                    subColor="#059669"
+                />
                 <StatCard
                     label="Open Tickets"
                     value={String(tickets.filter(t => t.status === "OPEN").length)}
@@ -86,7 +91,13 @@ export default function AdminDashboard() {
                     sub={`${tickets.filter(t => t.priority === "HIGH").length} high priority`}
                     subColor="#DC2626"
                 />
-                <StatCard label="Pending Approvals" value="14" icon="⏳" sub="Awaiting review" subColor="#D97706" />
+                <StatCard
+                    label="Pending Approvals"
+                    value={String(bookings.filter(b => b.status === "PENDING").length)}
+                    icon="⏳"
+                    sub="Awaiting review"
+                    subColor="#D97706"
+                />
             </div>
 
             {/* Bottom grid */}
@@ -98,16 +109,28 @@ export default function AdminDashboard() {
                         <button style={styles.viewAll}>View All</button>
                     </div>
                     <div>
-                        {recentBookings.map(b => (
-                            <div key={b.id} style={styles.bookingRow}>
-                                <div style={styles.bookingIcon}>📅</div>
-                                <div style={styles.bookingInfo}>
-                                    <p style={styles.bookingName}>{b.resource}</p>
-                                    <p style={styles.bookingMeta}>{b.user} · {b.date} · {b.time}</p>
+                        <div style={{ maxHeight: 320, overflowY: "auto" }}>
+                            {bookings.length === 0 ? (
+                                <div style={styles.emptyBookings}>
+                                    <span style={{ fontSize: "2rem" }}>📭</span>
+                                    <p style={styles.emptyBookingsTitle}>No recent bookings</p>
+                                    <p style={styles.emptyBookingsHint}>Bookings will appear here once created</p>
                                 </div>
-                                <Badge status={b.status} />
-                            </div>
-                        ))}
+                            ) : (
+                                bookings.slice(0, 10).map(b => (
+                                    <div key={b.id} style={styles.bookingRow}>
+                                        <div style={styles.bookingIcon}>📅</div>
+                                        <div style={styles.bookingInfo}>
+                                            <p style={styles.bookingName}>{b.resource?.name || "Resource"}</p>
+                                            <p style={styles.bookingMeta}>
+                                                {b.user?.name} · {b.date} · {b.startTime} - {b.endTime}
+                                            </p>
+                                        </div>
+                                        <Badge status={b.status} />
+                                    </div>
+                                ))
+                            )}
+                        </div>
                     </div>
                 </div>
 
@@ -136,9 +159,24 @@ export default function AdminDashboard() {
                         <h2 style={styles.cardTitle}>At a Glance</h2>
                         <div style={styles.glanceList}>
                             {[
-                                { icon: "✅", color: "#059669", title: "32 Approved", sub: "Bookings this week" },
-                                { icon: "⏳", color: "#D97706", title: "14 Pending", sub: "Awaiting approval" },
-                                { icon: "⚠️", color: "#DC2626", title: "5 Critical", sub: "High priority tickets" },
+                                {
+                                    icon: "✅",
+                                    color: "#059669",
+                                    title: `${bookings.filter(b => b.status === "APPROVED").length} Approved`,
+                                    sub: "Total approved bookings"
+                                },
+                                {
+                                    icon: "⏳",
+                                    color: "#D97706",
+                                    title: `${bookings.filter(b => b.status === "PENDING").length} Pending`,
+                                    sub: "Awaiting approval"
+                                },
+                                {
+                                    icon: "⚠️",
+                                    color: "#DC2626",
+                                    title: `${tickets.filter(t => t.priority === "HIGH").length} Critical`,
+                                    sub: "High priority tickets"
+                                },
                             ].map((g, i) => (
                                 <div key={i} style={styles.glanceItem}>
                                     <div style={{ ...styles.glanceDot, backgroundColor: g.color + "20" }}>
@@ -207,11 +245,27 @@ const styles = {
     heroSub: { fontSize: "1.2rem", color: "rgba(241, 241, 241, 0.7)", marginBottom: 6, fontWeight: 500 },
     heroTitle: { fontFamily: "var(--font-heading)", fontSize: "1.75rem", fontWeight: 700, color: "#fff", marginBottom: 8 },
     heroDesc: { fontSize: "0.875rem", color: "rgba(241, 241, 241, 0.7)", maxWidth: 500 },
-
     statsRow: { display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14 },
-
     grid: { display: "grid", gridTemplateColumns: "1fr 320px", gap: 14 },
-
+    emptyBookings: {
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "2.5rem",
+        gap: "0.5rem",
+        textAlign: "center",
+    },
+    emptyBookingsTitle: {
+        fontSize: "0.9rem",
+        fontWeight: 600,
+        color: "var(--color-text)",
+        fontFamily: "var(--font-heading)",
+    },
+    emptyBookingsHint: {
+        fontSize: "0.78rem",
+        color: "var(--color-text-light)",
+    },
     card: {
         backgroundColor: "#fff",
         borderRadius: 14,
