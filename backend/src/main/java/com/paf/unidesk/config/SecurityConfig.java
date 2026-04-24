@@ -1,13 +1,12 @@
 package com.paf.unidesk.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -26,7 +25,6 @@ public class SecurityConfig {
     @Autowired
     private OAuth2SuccessHandler oAuth2SuccessHandler;
 
-    // ✅ KEEP YOUR CORS CONFIG
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
@@ -41,49 +39,74 @@ public class SecurityConfig {
         return source;
     }
 
-    // ✅ MERGED SECURITY CONFIG
     @Bean
-    public SecurityFilterChain securityFilterChain(
-            HttpSecurity http,
-            ObjectProvider<ClientRegistrationRepository> clientRegistrationRepositoryProvider
-    ) throws Exception {
-
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .csrf(csrf -> csrf.disable())
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )
-                .authorizeHttpRequests(auth -> auth
-                        // 🔓 Public endpoints
-                        .requestMatchers("/oauth2/**").permitAll()
-                        .requestMatchers("/login/**").permitAll()
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .csrf(csrf -> csrf.disable())
+            .sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
+            .authorizeHttpRequests(auth -> auth
 
-                        // 🔐 Authenticated endpoints
-                        .requestMatchers("/api/auth/me").authenticated()
-                        .requestMatchers("/api/auth/logout").authenticated()
-                        .requestMatchers("/api/notifications/**").authenticated()
+                // Public
+                .requestMatchers("/oauth2/**").permitAll()
+                .requestMatchers("/login/**").permitAll()
+                .requestMatchers("/uploads/**").permitAll()
 
-                        // 🔐 Admin endpoints
-                        .requestMatchers("/api/auth/users").hasRole("ADMIN")
-                        .requestMatchers("/api/auth/users/**").hasRole("ADMIN")
+                // Auth endpoints
+                .requestMatchers("/api/auth/me").authenticated()
+                .requestMatchers("/api/auth/logout").authenticated()
+                .requestMatchers("/api/auth/users").hasRole("ADMIN")
+                .requestMatchers("/api/auth/users/**").hasRole("ADMIN")
 
-                        // 👉 IMPORTANT: allow your booking APIs (for now)
-                        .requestMatchers("/api/bookings/**").permitAll()
+                // Notification endpoints
+                .requestMatchers("/api/notifications/**").authenticated()
 
-                        // default
-                        .anyRequest().authenticated()
-                );
+                // Resource endpoints
+                .requestMatchers(HttpMethod.GET, "/api/resources").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/resources/**").authenticated()
+                .requestMatchers(HttpMethod.POST, "/api/resources").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/resources/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/resources/**").hasRole("ADMIN")
 
-        // ✅ SAFE OAuth (ONLY if configured)
-        if (clientRegistrationRepositoryProvider.getIfAvailable() != null) {
-            http.oauth2Login(oauth2 -> oauth2
-                    .successHandler(oAuth2SuccessHandler)
-            );
-        }
+                // Booking endpoints
+                .requestMatchers(HttpMethod.POST, "/api/bookings").authenticated()
+                .requestMatchers(HttpMethod.POST, "/api/bookings/check").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/bookings").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/bookings/{id}").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/bookings/status/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/bookings/*/approve").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/bookings/*/reject").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/bookings/**").hasRole("ADMIN")
 
-        // ✅ JWT filter
-        http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                // Ticket endpoints
+                .requestMatchers(HttpMethod.POST, "/api/tickets").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/tickets/my").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/tickets/filter").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/tickets/my-assigned/**").hasAnyRole("ADMIN", "TECHNICIAN")
+                .requestMatchers(HttpMethod.GET, "/api/tickets/assigned/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/tickets/**").authenticated()
+                .requestMatchers(HttpMethod.PUT, "/api/tickets/*/status").hasAnyRole("ADMIN", "TECHNICIAN")
+                .requestMatchers(HttpMethod.PUT, "/api/tickets/*/assign/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/tickets/*/technician-update/**").hasRole("TECHNICIAN")
+                .requestMatchers(HttpMethod.PUT, "/api/tickets/*/reject/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/tickets/**").authenticated()
+                .requestMatchers(HttpMethod.DELETE, "/api/tickets/**").authenticated()
+                .requestMatchers(HttpMethod.POST, "/api/tickets/*/comments/**").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/tickets/*/comments").authenticated()
+                .requestMatchers(HttpMethod.PUT, "/api/tickets/comments/**").authenticated()
+                .requestMatchers(HttpMethod.DELETE, "/api/tickets/comments/**").authenticated()
+                .requestMatchers(HttpMethod.POST, "/api/tickets/*/attachments").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/tickets/*/attachments").authenticated()
+                .requestMatchers(HttpMethod.DELETE, "/api/tickets/attachments/**").authenticated()
+
+                .anyRequest().authenticated()
+            )
+            .oauth2Login(oauth2 -> oauth2
+                .successHandler(oAuth2SuccessHandler)
+            )
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

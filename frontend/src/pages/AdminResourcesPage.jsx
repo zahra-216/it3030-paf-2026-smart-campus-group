@@ -291,7 +291,7 @@ export default function AdminResourcesPage() {
 
 function typeIcon(type) {
     switch (type) {
-        case ResourceType.LAB: return "🔬";
+        case ResourceType.LAB: return "🖥️";
         case ResourceType.LECTURE_HALL: return "🏛️";
         case ResourceType.MEETING_ROOM: return "🤝";
         case ResourceType.EQUIPMENT: return "📷";
