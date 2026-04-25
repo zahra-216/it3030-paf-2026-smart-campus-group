@@ -62,6 +62,14 @@ public class BookingController {
         return bookingService.rejectBooking(id, reason);
     }
 
+    // ✅ Cancel booking
+    @PutMapping("/{id}/cancel")
+    public Booking cancelBooking(
+            @PathVariable Long id,
+            @RequestParam(required = false) String reason) {
+        return bookingService.cancelBooking(id, reason);
+    }
+
     // ✅ Delete booking
     @DeleteMapping("/{id}")
     public String deleteBooking(@PathVariable Long id) {

@@ -5,10 +5,8 @@ import { ResourceType, ResourceStatus } from "../constants/enums";
 
 const API_BASE = "http://localhost:8081/api/resources";
 
-export default function ResourcesPage() {
+export default function AdminResourcesPage() {
     const { token } = useAuth();
-    const { user } = useAuth();
-    const isAdmin = user?.role === "ADMIN";
 
     const [resources, setResources] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -120,15 +118,11 @@ export default function ResourcesPage() {
             <div style={styles.header}>
                 <div>
                     <h1 style={styles.title}>Facilities & Assets</h1>
-                    <p style={styles.subtitle}>
-                        {isAdmin ? "Manage campus resources, rooms, and equipment." : "Browse and search available campus resources."}
-                    </p>
+                    <p style={styles.subtitle}>Manage campus resources, rooms, and equipment.</p>
                 </div>
-                {isAdmin && (
-                    <button style={styles.addBtn} onClick={openCreateModal}>
-                        + Add Resource
-                    </button>
-                )}
+                <button style={styles.addBtn} onClick={openCreateModal}>
+                    + Add Resource
+                </button>
             </div>
 
             {/* Filters */}
@@ -172,7 +166,7 @@ export default function ResourcesPage() {
                 <div style={styles.emptyCard}>
                     <p style={{ fontSize: "2rem" }}>🏛️</p>
                     <p style={styles.emptyTitle}>No resources found</p>
-                    <p style={styles.hint}>Try adjusting your filters{isAdmin ? " or add a new resource." : "."}</p>
+                    <p style={styles.hint}>Try adjusting your filters or add a new resource.</p>
                 </div>
             ) : (
                 <div style={styles.grid}>
@@ -186,7 +180,6 @@ export default function ResourcesPage() {
                             </div>
                             <p style={styles.resourceName}>{r.name}</p>
                             <p style={styles.resourceType}>{r.type?.replace(/_/g, " ")}</p>
-
                             <div style={styles.metaList}>
                                 <div style={styles.metaRow}>
                                     <span style={styles.metaIcon}>📍</span>
@@ -206,13 +199,10 @@ export default function ResourcesPage() {
                                     </span>
                                 </div>
                             </div>
-
-                            {isAdmin && (
-                                <div style={styles.cardActions}>
-                                    <button style={styles.editBtn} onClick={() => openEditModal(r)}>Edit</button>
-                                    <button style={styles.deleteBtn} onClick={() => setDeleteConfirmId(r.id)}>Delete</button>
-                                </div>
-                            )}
+                            <div style={styles.cardActions}>
+                                <button style={styles.editBtn} onClick={() => openEditModal(r)}>Edit</button>
+                                <button style={styles.deleteBtn} onClick={() => setDeleteConfirmId(r.id)}>Delete</button>
+                            </div>
                         </div>
                     ))}
                 </div>
@@ -226,7 +216,6 @@ export default function ResourcesPage() {
                             <h2 style={styles.modalTitle}>{editingResource ? "Edit Resource" : "Add New Resource"}</h2>
                             <button style={styles.closeBtn} onClick={() => setShowModal(false)}>✕</button>
                         </div>
-
                         <div style={styles.formGrid}>
                             <div style={styles.formGroup}>
                                 <label style={styles.label}>Name *</label>
@@ -269,7 +258,6 @@ export default function ResourcesPage() {
                                 </>
                             )}
                         </div>
-
                         <div style={styles.modalFooter}>
                             <button style={styles.cancelBtn} onClick={() => setShowModal(false)}>Cancel</button>
                             <button style={styles.saveBtn} onClick={handleSubmit} disabled={submitting}>
@@ -303,7 +291,7 @@ export default function ResourcesPage() {
 
 function typeIcon(type) {
     switch (type) {
-        case ResourceType.LAB: return "🔬";
+        case ResourceType.LAB: return "🖥️";
         case ResourceType.LECTURE_HALL: return "🏛️";
         case ResourceType.MEETING_ROOM: return "🤝";
         case ResourceType.EQUIPMENT: return "📷";

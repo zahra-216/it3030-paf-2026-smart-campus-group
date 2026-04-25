@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
 
 import LoginPage from "./pages/LoginPage";
@@ -10,46 +10,23 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 function App() {
-  const { user, loading } = useAuth();
+    return (
+        <Routes>
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/oauth2/callback" element={<OAuthCallback />} />
+            <Route
+                path="/dashboard"
+                element={
+                    <ProtectedRoute>
+                        <Dashboard />
+                    </ProtectedRoute>
+                }
+            />
 
-  if (loading) {
-    return <div style={{ padding: "2rem" }}>Loading...</div>;
-  }
-
-  return (
-    <Router>
-      <ToastContainer position="top-right" autoClose={3000} />
-
-      <Routes>
-
-        {/* LOGIN */}
-        <Route
-          path="/login"
-          element={user ? <Navigate to="/dashboard" /> : <LoginPage />}
-        />
-
-        {/* DASHBOARD (PROTECTED) */}
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* OAUTH CALLBACK */}
-        <Route path="/oauth2/callback" element={<OAuthCallback />} />
-
-        {/* DEFAULT ROUTE (SMART) */}
-        <Route
-          path="*"
-          element={<Navigate to={user ? "/dashboard" : "/login"} />}
-        />
-
-      </Routes>
-    </Router>
-  );
+            <Route path="/" element={<Navigate to="/login" />} />
+	        <Route path="*" element={<Navigate to="/login" />} />            
+        </Routes>
+    );
 }
 
 export default App;

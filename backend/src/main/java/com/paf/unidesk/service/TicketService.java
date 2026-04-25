@@ -22,9 +22,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.paf.unidesk.service.NotificationService;
 import com.paf.unidesk.enums.NotificationType;
-import com.paf.unidesk.enums.Role;
 
 import java.io.File;
 import java.util.List;
@@ -103,8 +101,7 @@ public class TicketService {
         return mapToResponse(ticket);
     }
 
-    // ✅ MAPPER
-    private TicketResponse mapToResponse(Ticket ticket) {
+   private TicketResponse mapToResponse(Ticket ticket) {
 
     TicketResponse.TicketResponseBuilder builder = TicketResponse.builder()
             .id(ticket.getId())
@@ -115,12 +112,28 @@ public class TicketService {
             .status(ticket.getStatus())
             .location(ticket.getLocation())
             .contactDetails(ticket.getContactDetails())
-            .resolutionNotes(ticket.getResolutionNotes());
-            
 
+            .resolutionNotes(ticket.getResolutionNotes())
+            .rejectionReason(ticket.getRejectionReason())
+
+            .createdAt(ticket.getCreatedAt())
+            .updatedAt(ticket.getUpdatedAt());
+
+    // Submitted by
+    if (ticket.getCreatedBy() != null) {
+        builder.submittedById(ticket.getCreatedBy().getId())
+               .submittedByName(ticket.getCreatedBy().getName());
+    }
+
+    // Assigned to
     if (ticket.getAssignedTo() != null) {
         builder.assignedToId(ticket.getAssignedTo().getId())
                .assignedToName(ticket.getAssignedTo().getName());
+    }
+
+    // Resource
+    if (ticket.getResource() != null) {
+        builder.resourceId(ticket.getResource().getId());
     }
 
     return builder.build();
