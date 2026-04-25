@@ -77,6 +77,8 @@ export default function AdminNotificationsPage() {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
+            // Dispatch event so Topbar refreshes
+            window.dispatchEvent(new Event("notif-updated"));
         } catch {}
     };
 
@@ -86,6 +88,7 @@ export default function AdminNotificationsPage() {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+            window.dispatchEvent(new Event("notif-updated"));
         } catch {}
     };
 

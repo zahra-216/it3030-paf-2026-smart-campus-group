@@ -90,9 +90,9 @@ export default function NotificationsPage() {
             await axios.put(`http://localhost:8081/api/notifications/${id}/read`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            setNotifications(prev =>
-                prev.map(n => n.id === id ? { ...n, isRead: true } : n)
-            );
+            setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
+            // Dispatch event so Topbar refreshes
+            window.dispatchEvent(new Event("notif-updated"));
         } catch {}
     };
 
@@ -102,6 +102,7 @@ export default function NotificationsPage() {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+            window.dispatchEvent(new Event("notif-updated"));
         } catch {}
     };
 

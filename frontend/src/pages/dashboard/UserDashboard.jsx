@@ -141,12 +141,24 @@ export default function UserDashboard({ onPageChange }) {
                 <h2 style={styles.cardTitle}>Quick Actions</h2>
                 <div style={styles.actionsRow}>
                     {[
-                        { icon: "📅", label: "New Booking", desc: "Book a room or equipment", color: "#1B4332" },
-                        { icon: "🔧", label: "Report Issue", desc: "Submit a maintenance request", color: "#D97706" },
-                        { icon: "🏛️", label: "Browse Resources", desc: "View available facilities", color: "#1D4ED8" },
-                        { icon: "📋", label: "My Requests", desc: "Track your submissions", color: "#7C3AED" },
+                        { icon: "📅", label: "New Booking", desc: "Book a room or equipment", color: "#1B4332", page: "bookings" },
+                        { icon: "🔧", label: "Report Issue", desc: "Submit a maintenance request", color: "#D97706", page: "tickets" },
+                        { icon: "🏛️", label: "Browse Resources", desc: "View available facilities", color: "#1D4ED8", page: "resources" },
+                        { icon: "📋", label: "My Requests", desc: "Track your submissions", color: "#7C3AED", page: "bookings" },
                     ].map((a, i) => (
-                        <div key={i} style={styles.actionCard}>
+                        <div
+                            key={i}
+                            style={styles.actionCard}
+                            onClick={() => onPageChange(a.page)}
+                            onMouseEnter={e => {
+                                e.currentTarget.style.transform = "translateY(-4px)";
+                                e.currentTarget.style.boxShadow = "0 10px 32px rgba(0,0,0,0.1)";
+                            }}
+                            onMouseLeave={e => {
+                                e.currentTarget.style.transform = "translateY(0)";
+                                e.currentTarget.style.boxShadow = "none";
+                            }}
+                        >
                             <div style={{ ...styles.actionIcon, backgroundColor: a.color + "15" }}>
                                 <span style={{ fontSize: "1.5rem" }}>{a.icon}</span>
                             </div>
