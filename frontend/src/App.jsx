@@ -3,8 +3,12 @@ import { useAuth } from "./context/AuthContext";
 
 import LoginPage from "./pages/LoginPage";
 import Dashboard from "./pages/Dashboard";
+import Dashboard from "./pages/Dashboard";
 import OAuthCallback from "./pages/OAuthCallback";
 import ProtectedRoute from "./components/ProtectedRoute";
+
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
     return (

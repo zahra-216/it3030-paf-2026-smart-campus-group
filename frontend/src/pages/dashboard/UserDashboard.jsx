@@ -46,10 +46,15 @@ export default function UserDashboard({ onPageChange }) {
                 headers: { Authorization: `Bearer ${token}` }
             })
             .then(res => {
+<<<<<<< HEAD
                 const data = Array.isArray(res.data) ? res.data : [];
                 const userBookings = data.filter(b => 
                     String(b.user?.id) === String(user?.id)
                 );
+=======
+                // filter only current user's bookings
+                const userBookings = res.data.filter(b => b.user?.id === user.id);
+>>>>>>> 373f9c85a23d5bcf0b20c280459dfb3845b8a035
                 setMyBookings(userBookings);
             })
             .catch(() => setMyBookings([]));
@@ -178,10 +183,23 @@ export default function UserDashboard({ onPageChange }) {
                     <div style={styles.cardHead}>
                         <h2 style={styles.cardTitle}>My Bookings</h2>
                     </div>
+<<<<<<< HEAD
                     <div style={{ maxHeight: 280, overflowY: "auto", paddingRight: "0.75rem" }}>
                         {myBookings.length === 0 ? (
                             <div style={styles.empty}>
                                 <p>No bookings yet</p>
+=======
+                    {myBookings.length === 0 ? (
+                        <div style={styles.empty}>
+                            <p>No bookings yet</p>
+                        </div>
+                    ) : myBookings.map(b => (
+                        <div key={b.id} style={styles.row}>
+                            <div style={styles.rowIcon}>📅</div>
+                            <div style={styles.rowInfo}>
+                                <p style={styles.rowName}>{b.resource?.name || "Resource"}</p>
+                                <p style={styles.rowMeta}>{b.date} · {b.startTime} - {b.endTime}</p>
+>>>>>>> 373f9c85a23d5bcf0b20c280459dfb3845b8a035
                             </div>
                         ) : myBookings.map(b => (
                             <div key={b.id} style={styles.row}>

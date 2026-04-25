@@ -15,11 +15,36 @@ function getTimeAgo(dateStr) {
 }
 
 export default function Topbar() {
+    function getTimeAgo(dateStr) {
+        if (!dateStr) return "";
+        const diff = Date.now() - new Date(dateStr).getTime();
+        const mins = Math.floor(diff / 60000);
+        const hours = Math.floor(diff / 3600000);
+        const days = Math.floor(diff / 86400000);
+        if (mins < 1) return "Just now";
+        if (mins < 60) return `${mins}m ago`;
+        if (hours < 24) return `${hours}h ago`;
+        return `${days}d ago`;
+    }
     const { user, token } = useAuth();
     const [notifOpen, setNotifOpen] = useState(false);
     const [unreadCount, setUnreadCount] = useState(0);
     const [notifications, setNotifications] = useState([]);
     const notifRef = useRef(null);
+    const [notifications, setNotifications] = useState([]);
+
+    useEffect(() => {
+        if (token) {
+            axios.get("http://localhost:8081/api/notifications/unread", {
+                headers: { Authorization: `Bearer ${token}` }
+            })
+            .then(res => {
+                setUnreadCount(res.data.length);
+                setNotifications(res.data);
+            })
+            .catch(() => {});
+        }
+    }, [token]);
 
     useEffect(() => {
         const fetchNotifData = () => {
@@ -59,6 +84,16 @@ export default function Topbar() {
         } catch {}
     };
 
+    const handleMarkAllRead = async () => {
+        try {
+            await axios.put("http://localhost:8081/api/notifications/read-all", {}, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setUnreadCount(0);
+            setNotifications([]);
+        } catch {}
+    };
+
     return (
         <header style={styles.topbar}>
             <div style={styles.searchWrap}>
@@ -78,7 +113,7 @@ export default function Topbar() {
                         {unreadCount > 0 && <span style={styles.badge}>{unreadCount}</span>}
                     </button>
 
-                    {notifOpen && (
+                   {notifOpen && (
                         <div style={styles.dropdown}>
                             <div style={styles.dropHead}>
                                 <span style={styles.dropTitle}>Notifications</span>
@@ -137,6 +172,34 @@ export default function Topbar() {
 }
 
 const styles = {
+    notifItem: {
+        display: "flex",
+        alignItems: "flex-start",
+        gap: 10,
+        padding: "10px 16px",
+        borderBottom: "1px solid var(--color-border)",
+        cursor: "pointer",
+    },
+    notifDot: {
+        width: 8,
+        height: 8,
+        borderRadius: "50%",
+        backgroundColor: "var(--color-primary)",
+        flexShrink: 0,
+        marginTop: 5,
+    },
+    notifMsg: {
+        fontSize: "0.78rem",
+        color: "var(--color-text)",
+        lineHeight: 1.4,
+        fontWeight: 500,
+    },
+    notifTime: {
+        fontSize: "0.68rem",
+        color: "var(--color-text-light)",
+        marginTop: 2,
+    },
+
     topbar: {
         height: 56,
         backgroundColor: "var(--color-white)",

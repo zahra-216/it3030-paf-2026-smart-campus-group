@@ -24,6 +24,9 @@ public class BookingService {
     @Autowired
     private NotificationService notificationService;
 
+    @Autowired
+    private NotificationService notificationService;
+
     // ✅ Create booking with validation + smart conflict message
     public Booking createBooking(Booking booking) {
 
@@ -146,6 +149,16 @@ public class BookingService {
         }
 
         booking.setStatus(BookingStatus.APPROVED);
+        Booking saved = bookingRepository.save(booking);
+
+        notificationService.createNotification(
+            booking.getUser(),
+            "Your booking for " + booking.getResource().getName() + " on " + booking.getDate() + " has been approved.",
+            NotificationType.BOOKING,
+            booking.getId()
+        );
+
+        return saved;
         Booking saved = bookingRepository.save(booking);
 
         notificationService.createNotification(

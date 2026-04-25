@@ -8,11 +8,16 @@ const TYPE_CONFIG = {
     COMMENT: { icon: "💬", label: "Comment", color: "#1D4ED8",              bg: "#EFF6FF" },
 };
 
+<<<<<<< HEAD
 function NotifCard({ notif, onMarkRead, onDelete }) {
+=======
+function NotifCard({ notif, onMarkRead }) {
+>>>>>>> 373f9c85a23d5bcf0b20c280459dfb3845b8a035
     const type = TYPE_CONFIG[notif.type] || TYPE_CONFIG.TICKET;
     const timeAgo = getTimeAgo(notif.createdAt);
 
     return (
+<<<<<<< HEAD
             <div style={{
                 ...styles.card,
                 backgroundColor: notif.isRead ? "var(--color-white)" : "#F0FAF4",
@@ -65,6 +70,41 @@ function NotifCard({ notif, onMarkRead, onDelete }) {
                 </div>
             </div>
         );
+=======
+        <div style={{
+            ...styles.card,
+            backgroundColor: notif.isRead ? "var(--color-white)" : "#F0FAF4",
+            borderLeft: notif.isRead ? "3px solid transparent" : "3px solid var(--color-primary)",
+        }}>
+            <div style={{ ...styles.iconWrap, backgroundColor: type.bg }}>
+                <span style={{ fontSize: "1.1rem" }}>{type.icon}</span>
+            </div>
+            <div style={styles.cardBody}>
+                <div style={styles.cardTop}>
+                    <span style={{ ...styles.typeBadge, backgroundColor: type.bg, color: type.color }}>
+                        {type.label}
+                    </span>
+                    <span style={styles.timeAgo}>{timeAgo}</span>
+                </div>
+                <p style={{
+                    ...styles.message,
+                    fontWeight: notif.isRead ? 400 : 600,
+                    color: notif.isRead ? "var(--color-text-light)" : "var(--color-text)",
+                }}>
+                    {notif.message}
+                </p>
+            </div>
+            {!notif.isRead && (
+                <button style={styles.markBtn} onClick={() => onMarkRead(notif.id)}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                        <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                </button>
+            )}
+            {notif.isRead && <div style={styles.readDot} />}
+        </div>
+    );
+>>>>>>> 373f9c85a23d5bcf0b20c280459dfb3845b8a035
 }
 
 export default function AdminNotificationsPage() {
@@ -91,14 +131,18 @@ export default function AdminNotificationsPage() {
     };
 
     const handleMarkRead = async (id) => {
+<<<<<<< HEAD
         // Update UI immediately
         setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
         window.dispatchEvent(new Event("notif-updated"));
         
+=======
+>>>>>>> 373f9c85a23d5bcf0b20c280459dfb3845b8a035
         try {
             await axios.put(`http://localhost:8081/api/notifications/${id}/read`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
+<<<<<<< HEAD
         } catch {
             fetchNotifications();
         }
@@ -124,13 +168,25 @@ export default function AdminNotificationsPage() {
         setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
         window.dispatchEvent(new Event("notif-updated"));
         
+=======
+            setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
+        } catch {}
+    };
+
+    const handleMarkAllRead = async () => {
+>>>>>>> 373f9c85a23d5bcf0b20c280459dfb3845b8a035
         try {
             await axios.put("http://localhost:8081/api/notifications/read-all", {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
+<<<<<<< HEAD
         } catch {
             fetchNotifications();
         }
+=======
+            setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+        } catch {}
+>>>>>>> 373f9c85a23d5bcf0b20c280459dfb3845b8a035
     };
 
     const filters = ["ALL", "BOOKING", "TICKET"];
@@ -226,7 +282,11 @@ export default function AdminNotificationsPage() {
                                     Unread
                                 </p>
                                 {displayedNotifs.filter(n => !n.isRead).map(n => (
+<<<<<<< HEAD
                                     <NotifCard key={n.id} notif={n} onMarkRead={handleMarkRead} onDelete={handleDelete} />
+=======
+                                    <NotifCard key={n.id} notif={n} onMarkRead={handleMarkRead} />
+>>>>>>> 373f9c85a23d5bcf0b20c280459dfb3845b8a035
                                 ))}
                             </div>
                         )}
@@ -239,7 +299,11 @@ export default function AdminNotificationsPage() {
                                     Earlier
                                 </p>
                                 {displayedNotifs.filter(n => n.isRead).map(n => (
+<<<<<<< HEAD
                                     <NotifCard key={n.id} notif={n} onMarkRead={handleMarkRead} onDelete={handleDelete}/>
+=======
+                                    <NotifCard key={n.id} notif={n} onMarkRead={handleMarkRead} />
+>>>>>>> 373f9c85a23d5bcf0b20c280459dfb3845b8a035
                                 ))}
                             </div>
                         )}
@@ -285,6 +349,7 @@ const styles = {
         color: "var(--color-white)", border: "none", borderRadius: 8,
         fontSize: "0.82rem", fontWeight: 600, cursor: "pointer", fontFamily: "var(--font-body)",
     },
+<<<<<<< HEAD
     cardActions: {
         display: "flex",
         flexDirection: "column",
@@ -304,6 +369,8 @@ const styles = {
         cursor: "pointer",
         flexShrink: 0,
     },
+=======
+>>>>>>> 373f9c85a23d5bcf0b20c280459dfb3845b8a035
     statsRow: { display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 },
     statCard: {
         borderRadius: 12, padding: "1rem 1.25rem",
