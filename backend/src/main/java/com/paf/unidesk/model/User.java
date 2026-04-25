@@ -2,7 +2,6 @@ package com.paf.unidesk.model;
 
 import com.paf.unidesk.enums.OAuthProvider;
 import com.paf.unidesk.enums.Role;
-import com.paf.unidesk.enums.UserType;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -43,16 +42,8 @@ public class User extends BaseEntity {
     private Role role;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = true)
-    private UserType userType;
-
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private OAuthProvider oauthProvider;
 
     private String oauthId;
-
-    @Builder.Default
-    @Column(nullable = false)
-    private Boolean isProfileComplete = false;
 }
