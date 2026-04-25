@@ -86,4 +86,15 @@ public class NotificationService {
         unreadNotifications.forEach(notification -> notification.setIsRead(true));
         notificationRepository.saveAll(unreadNotifications);
     }
+
+    // Delete a notification
+    public void deleteNotification(String token, Long notificationId) {
+        User user = getUserFromToken(token);
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Notification not found"));
+        if (!notification.getUser().getId().equals(user.getId())) {
+            throw new UnauthorizedException("You cannot delete this notification");
+        }
+        notificationRepository.delete(notification);
+    }
 }

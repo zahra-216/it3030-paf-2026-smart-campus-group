@@ -4,18 +4,7 @@ import StatCard from "../../components/ui/StatCard";
 import Badge from "../../components/ui/Badge";
 import axios from "axios";
 
-const myBookings = [
-    { id: 1, resource: "Computer Lab B", date: "Apr 11, 2026", time: "13:00 - 15:00", status: "PENDING" },
-    { id: 2, resource: "Meeting Room 204", date: "Apr 12, 2026", time: "10:00 - 11:30", status: "APPROVED" },
-    { id: 3, resource: "Lecture Hall A", date: "Apr 14, 2026", time: "09:00 - 11:00", status: "APPROVED" },
-];
-
-const myTickets = [
-    { id: "TK-012", issue: "Broken chair in Lab 201", priority: "LOW", status: "OPEN" },
-    { id: "TK-008", issue: "AC not cooling in Room 305", priority: "MEDIUM", status: "IN_PROGRESS" },
-];
-
-export default function UserDashboard() {
+export default function UserDashboard({ onPageChange }) {
     const [time, setTime] = useState(new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }));
 
     useEffect(() => {
@@ -40,6 +29,7 @@ export default function UserDashboard() {
     }, [token]);
 
     const [myTickets, setMyTickets] = useState([]);
+    const [myBookings, setMyBookings] = useState([]);
     const [resourceCount, setResourceCount] = useState(0);
 
     useEffect(() => {
@@ -50,6 +40,19 @@ export default function UserDashboard() {
             })
             .then(res => setMyTickets(res.data))
             .catch(() => setMyTickets([]));
+
+            // fetch my bookings
+            axios.get("http://localhost:8081/api/bookings", {
+                headers: { Authorization: `Bearer ${token}` }
+            })
+            .then(res => {
+                const data = Array.isArray(res.data) ? res.data : [];
+                const userBookings = data.filter(b => 
+                    String(b.user?.id) === String(user?.id)
+                );
+                setMyBookings(userBookings);
+            })
+            .catch(() => setMyBookings([]));
 
             // fetch resources count
             axios.get("http://localhost:8081/api/resources", {
@@ -107,9 +110,9 @@ export default function UserDashboard() {
             <div style={styles.statsRow}>
                 <StatCard
                     label="My Bookings"
-                    value="0"
+                    value={String(myBookings.length)}
                     icon="📅"
-                    sub="Coming soon"
+                    sub={`${myBookings.filter(b => b.status === "PENDING").length} pending`}
                     subColor="#059669"
                 />
                 <StatCard
@@ -140,12 +143,24 @@ export default function UserDashboard() {
                 <h2 style={styles.cardTitle}>Quick Actions</h2>
                 <div style={styles.actionsRow}>
                     {[
-                        { icon: "📅", label: "New Booking", desc: "Book a room or equipment", color: "#1B4332" },
-                        { icon: "🔧", label: "Report Issue", desc: "Submit a maintenance request", color: "#D97706" },
-                        { icon: "🏛️", label: "Browse Resources", desc: "View available facilities", color: "#1D4ED8" },
-                        { icon: "📋", label: "My Requests", desc: "Track your submissions", color: "#7C3AED" },
+                        { icon: "📅", label: "New Booking", desc: "Book a room or equipment", color: "#1B4332", page: "bookings" },
+                        { icon: "🔧", label: "Report Issue", desc: "Submit a maintenance request", color: "#D97706", page: "tickets" },
+                        { icon: "🏛️", label: "Browse Resources", desc: "View available facilities", color: "#1D4ED8", page: "resources" },
+                        { icon: "📋", label: "My Requests", desc: "Track your submissions", color: "#7C3AED", page: "bookings" },
                     ].map((a, i) => (
-                        <div key={i} style={styles.actionCard}>
+                        <div
+                            key={i}
+                            style={styles.actionCard}
+                            onClick={() => onPageChange(a.page)}
+                            onMouseEnter={e => {
+                                e.currentTarget.style.transform = "translateY(-4px)";
+                                e.currentTarget.style.boxShadow = "0 10px 32px rgba(0,0,0,0.1)";
+                            }}
+                            onMouseLeave={e => {
+                                e.currentTarget.style.transform = "translateY(0)";
+                                e.currentTarget.style.boxShadow = "none";
+                            }}
+                        >
                             <div style={{ ...styles.actionIcon, backgroundColor: a.color + "15" }}>
                                 <span style={{ fontSize: "1.5rem" }}>{a.icon}</span>
                             </div>
@@ -162,43 +177,49 @@ export default function UserDashboard() {
                 <div style={styles.card}>
                     <div style={styles.cardHead}>
                         <h2 style={styles.cardTitle}>My Bookings</h2>
-                        <button style={styles.viewAll}>View All</button>
                     </div>
-                    {myBookings.map(b => (
-                        <div key={b.id} style={styles.row}>
-                            <div style={styles.rowIcon}>📅</div>
-                            <div style={styles.rowInfo}>
-                                <p style={styles.rowName}>{b.resource}</p>
-                                <p style={styles.rowMeta}>{b.date} · {b.time}</p>
+                    <div style={{ maxHeight: 280, overflowY: "auto", paddingRight: "0.75rem" }}>
+                        {myBookings.length === 0 ? (
+                            <div style={styles.empty}>
+                                <p>No bookings yet</p>
                             </div>
-                            <Badge status={b.status} />
-                        </div>
-                    ))}
+                        ) : myBookings.map(b => (
+                            <div key={b.id} style={styles.row}>
+                                <div style={styles.rowIcon}>📅</div>
+                                <div style={styles.rowInfo}>
+                                    <p style={styles.rowName}>{b.resource?.name || "Resource"}</p>
+                                    <p style={styles.rowMeta}>{b.date} · {b.startTime} - {b.endTime}</p>
+                                </div>
+                                <Badge status={b.status} />
+                            </div>
+                        ))}
+                    </div>
                 </div>
 
                 <div style={styles.card}>
                     <div style={styles.cardHead}>
                         <h2 style={styles.cardTitle}>My Tickets</h2>
-                        <button style={styles.viewAll}>View All</button>
                     </div>
-                    {myTickets.map(t => (
-                        <div key={t.id} style={styles.row}>
-                            <div style={styles.rowIcon}>🔧</div>
-                            <div style={styles.rowInfo}>
-                                <p style={styles.rowName}>{t.issue}</p>
-                                <p style={styles.rowMeta}>{t.id}</p>
+                    <div style={{ maxHeight: 280, overflowY: "auto", paddingRight: "0.75rem" }}>
+                        {myTickets.map(t => (
+                            <div key={t.id} style={styles.row}>
+                                <div style={styles.rowIcon}>🔧</div>
+                                <div style={styles.rowInfo}>
+                                    <p style={styles.rowName}>{t.title}</p>
+                                    <p style={styles.rowMeta}>#{t.id}</p>
+                                </div>
+                                <div style={{ display: "flex", flexDirection: "column", gap: 4, alignItems: "flex-end" }}>
+                                    <Badge status={t.priority} />
+                                    <Badge status={t.status} />
+                                </div>
                             </div>
-                            <div style={{ display: "flex", flexDirection: "column", gap: 4, alignItems: "flex-end" }}>
-                                <Badge status={t.priority} />
-                                <Badge status={t.status} />
+                        ))}
+                        {myTickets.length === 0 && (
+                            <div style={styles.empty}>
+                                <p>No tickets yet</p>
                             </div>
-                        </div>
-                    ))}
-                    {myTickets.length === 0 && (
-                        <div style={styles.empty}>
-                            <p>No tickets yet</p>
-                        </div>
-                    )}
+                        )}
+                    </div>
                 </div>
             </div>
         </div>
