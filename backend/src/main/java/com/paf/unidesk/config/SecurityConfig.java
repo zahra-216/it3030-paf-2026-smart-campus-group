@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -34,14 +33,12 @@ public class SecurityConfig {
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
         config.setExposedHeaders(List.of("Authorization"));
-
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -50,46 +47,24 @@ public class SecurityConfig {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
             .authorizeHttpRequests(auth -> auth
-
-                // Public
-                .requestMatchers("/oauth2/**").permitAll()
-                .requestMatchers("/login/**").permitAll()
-                .requestMatchers("/uploads/**").permitAll()
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .csrf(csrf -> csrf.disable())
-            .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            )
-            .authorizeHttpRequests(auth -> auth
-
-                // Public
                 .requestMatchers("/oauth2/**").permitAll()
                 .requestMatchers("/login/**").permitAll()
                 .requestMatchers("/uploads/**").permitAll()
 
-                // Auth endpoints
-                .requestMatchers("/api/auth/me").authenticated()
-                .requestMatchers("/api/auth/logout").authenticated()
-                .requestMatchers("/api/auth/users").hasRole("ADMIN")
-                .requestMatchers("/api/auth/users/**").hasRole("ADMIN")
-                // Auth endpoints
                 .requestMatchers("/api/auth/me").authenticated()
                 .requestMatchers("/api/auth/logout").authenticated()
                 .requestMatchers("/api/auth/users").hasRole("ADMIN")
                 .requestMatchers("/api/auth/users/**").hasRole("ADMIN")
 
-                // Notification endpoints
                 .requestMatchers("/api/notifications/**").authenticated()
                 .requestMatchers(HttpMethod.DELETE, "/api/notifications/**").authenticated()
 
-                // Resource endpoints
                 .requestMatchers(HttpMethod.GET, "/api/resources").authenticated()
                 .requestMatchers(HttpMethod.GET, "/api/resources/**").authenticated()
                 .requestMatchers(HttpMethod.POST, "/api/resources").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/api/resources/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/resources/**").hasRole("ADMIN")
 
-                // Booking endpoints
                 .requestMatchers(HttpMethod.POST, "/api/bookings").authenticated()
                 .requestMatchers(HttpMethod.POST, "/api/bookings/check").authenticated()
                 .requestMatchers(HttpMethod.GET, "/api/bookings").authenticated()
@@ -97,9 +72,9 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/bookings/status/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/api/bookings/*/approve").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/api/bookings/*/reject").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/bookings/*/cancel").authenticated()
                 .requestMatchers(HttpMethod.DELETE, "/api/bookings/**").hasRole("ADMIN")
 
-                // Ticket endpoints
                 .requestMatchers(HttpMethod.POST, "/api/tickets").authenticated()
                 .requestMatchers(HttpMethod.GET, "/api/tickets/my").authenticated()
                 .requestMatchers(HttpMethod.GET, "/api/tickets/filter").hasRole("ADMIN")

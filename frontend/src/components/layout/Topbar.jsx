@@ -31,7 +31,6 @@ export default function Topbar() {
     const [unreadCount, setUnreadCount] = useState(0);
     const [notifications, setNotifications] = useState([]);
     const notifRef = useRef(null);
-    const [notifications, setNotifications] = useState([]);
 
     useEffect(() => {
         if (token) {
@@ -81,16 +80,6 @@ export default function Topbar() {
             await axios.put("http://localhost:8081/api/notifications/read-all", {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-        } catch {}
-    };
-
-    const handleMarkAllRead = async () => {
-        try {
-            await axios.put("http://localhost:8081/api/notifications/read-all", {}, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            setUnreadCount(0);
-            setNotifications([]);
         } catch {}
     };
 
