@@ -83,7 +83,7 @@ function Avatar({ name, size = 26 }) {
   );
 }
 
-const INP = { padding: "0.625rem 0.875rem", border: "1.5px solid #e8edf3", borderRadius: 10, fontFamily: "inherit", fontSize: "0.85rem", color: "#1e293b", background: "#fff", outline: "none", width: "100%", transition: "border-color 0.15s, box-shadow 0.15s", boxSizing: "border-box" };
+const INP = { padding: "0.625rem 0.875rem", border: "1.5px solid #e8edf3", borderRadius: 10, fontFamily: "var(--font-body)", fontSize: "0.85rem", color: "var(--color-text)", background: "var(--color-white)", outline: "none", width: "100%", transition: "border-color 0.15s, box-shadow 0.15s", boxSizing: "border-box" };
 const SEL = { ...INP };
 const TA  = { ...INP, resize: "vertical", minHeight: 80, lineHeight: 1.65 };
 
@@ -144,6 +144,18 @@ export default function AdminDashboardTickets() {
   const { token, user: adminUser } = useAuth();
 
   const authHeaders = { Authorization: `Bearer ${token}` };
+
+  const [resources, setResources] = useState([]);
+
+  useEffect(() => {
+      if (!token) return;
+      fetch(`http://localhost:8081/api/resources`, {
+          headers: { Authorization: `Bearer ${token}` }
+      })
+      .then(r => r.json())
+      .then(data => setResources(Array.isArray(data) ? data : []))
+      .catch(() => {});
+  }, [token]);
 
   const api = {
     getAllTickets: () =>
@@ -464,14 +476,14 @@ export default function AdminDashboardTickets() {
 
   // ── RENDER ─────────────────────────────────────────────────────────────────
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem", fontFamily: "'Inter', system-ui, sans-serif", color: "#1e293b" }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem", fontFamily: "var(--font-body)", color: "#1e293b" }}>
       <style>{`
         @keyframes spin   { to { transform: rotate(360deg); } }
         @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .tkrow:hover  { background: #f8faff !important; transform: translateX(2px); }
-        .act-btn:hover { opacity: 0.82; transform: translateY(-1px); }
-        .xbtn:hover   { background: #f1f5f9 !important; color: #475569 !important; }
-      `}</style>
+        .tkrow:hover  { background: var(--color-off-white) !important; }
+        .xbtn:hover   { background: var(--color-off-white) !important; }
+        * { font-family: var(--font-body); }
+    `}</style>
 
       {/* TOAST */}
       {toast && (
@@ -1081,9 +1093,12 @@ export default function AdminDashboardTickets() {
           <Field label="Select Technician / Staff Member *">
             <select style={SEL} value={assignUserId} onChange={e => setAssignUserId(e.target.value)}>
               <option value="">— Select a user —</option>
-              {users.map(u => (
-                <option key={u.id} value={u.id}>{u.name || u.email} {u.role ? `(${u.role})` : ""}</option>
-              ))}
+              {users
+                  .filter(u => u.role === "TECHNICIAN")
+                  .map(u => (
+                      <option key={u.id} value={u.id}>{u.name || u.email}</option>
+                  ))
+              }
             </select>
           </Field>
           <div style={{ display: "flex", gap: 9, marginTop: 20, paddingTop: 16, borderTop: "1px solid #f1f5f9" }}>

@@ -53,7 +53,7 @@ const pill = (bg, color, border) => ({
 
 const INP = {
     padding: "0.625rem 0.875rem", border: "1.5px solid #e8edf3", borderRadius: 10,
-    fontFamily: "inherit", fontSize: "0.85rem", color: "#1e293b", background: "#fff",
+    fontFamily: "var(--font-body)", fontSize: "0.85rem", color: "var(--color-text)", background: "var(--color-white)",
     outline: "none", width: "100%", transition: "border-color 0.15s, box-shadow 0.15s", boxSizing: "border-box",
 };
 const TA = { ...INP, resize: "vertical", minHeight: 88, lineHeight: 1.65 };

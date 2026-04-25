@@ -180,7 +180,7 @@ function Modal({ title, sub, onClose, children, wide = false, zIndex = 99 }) {
 }
 
 // ─── INP / SEL / TA BASE STYLES ───────────────────────────────────────────────
-const INP = { padding:"0.625rem 0.875rem", border:"1.5px solid #e8edf3", borderRadius:10, fontFamily:"inherit", fontSize:"0.85rem", color:"#1e293b", background:"#fff", outline:"none", width:"100%", transition:"border-color 0.15s, box-shadow 0.15s", boxSizing:"border-box" };
+const INP = { padding:"0.625rem 0.875rem", border:"1.5px solid #e8edf3", borderRadius:10, fontFamily: "var(--font-body)", fontSize:"0.85rem", color: "var(--color-text)", background:"#fff", outline:"none", width:"100%", transition:"border-color 0.15s, box-shadow 0.15s", boxSizing:"border-box" };
 const SEL = { ...INP };
 const TA  = { ...INP, resize:"vertical", minHeight:88, lineHeight:1.65 };
 const pill = (bg, color, border) => ({ padding:"3px 10px", borderRadius:20, fontSize:"0.7rem", fontWeight:700, background:bg, color, border:`1px solid ${border||"transparent"}`, letterSpacing:"0.02em", display:"inline-block" });
@@ -196,12 +196,31 @@ function TicketFormFields({ form, setForm }) {
             onFocus={e => { e.target.style.borderColor="#3b82f6"; e.target.style.boxShadow="0 0 0 3px rgba(59,130,246,0.1)"; }}
             onBlur={e  => { e.target.style.borderColor="#e8edf3"; e.target.style.boxShadow="none"; }} />
         </Field>
-        <Field label="Location *">
-          <input style={INP} placeholder="e.g. Lab A401"
-            value={form.location} onChange={e => setForm({ ...form, location:e.target.value })}
-            onFocus={e => { e.target.style.borderColor="#3b82f6"; e.target.style.boxShadow="0 0 0 3px rgba(59,130,246,0.1)"; }}
-            onBlur={e  => { e.target.style.borderColor="#e8edf3"; e.target.style.boxShadow="none"; }} />
-        </Field>
+        <Field label="Location (Resource) *">
+          {resources.length > 0 ? (
+              <select style={SEL}
+                  value={form.resourceId}
+                  onChange={e => {
+                      const selected = resources.find(r => r.id === Number(e.target.value));
+                      setForm({
+                          ...form,
+                          resourceId: e.target.value,
+                          location: selected?.location || form.location,
+                      });
+                  }}>
+                  <option value="">Select a resource / location...</option>
+                  {resources.map(r => (
+                      <option key={r.id} value={r.id}>
+                          {r.name} — {r.location} (Capacity: {r.capacity})
+                      </option>
+                  ))}
+              </select>
+          ) : (
+              <input style={INP} placeholder="e.g. Lab A401"
+                  value={form.location}
+                  onChange={e => setForm({ ...form, location: e.target.value })} />
+          )}
+      </Field>
       </div>
       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12 }}>
         <Field label="Issue Category *">
@@ -218,12 +237,6 @@ function TicketFormFields({ form, setForm }) {
         </Field>
       </div>
       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12 }}>
-        <Field label="Resource ID (optional)">
-          <input style={INP} type="number" placeholder="Room / asset ID"
-            value={form.resourceId} onChange={e => setForm({ ...form, resourceId:e.target.value })}
-            onFocus={e => { e.target.style.borderColor="#3b82f6"; e.target.style.boxShadow="0 0 0 3px rgba(59,130,246,0.1)"; }}
-            onBlur={e  => { e.target.style.borderColor="#e8edf3"; e.target.style.boxShadow="none"; }} />
-        </Field>
         <Field label="Contact Number">
           <input style={INP} placeholder="07X XXX XXXX"
             value={form.contactDetails} onChange={e => setForm({ ...form, contactDetails:e.target.value })}
@@ -245,21 +258,35 @@ function TicketFormFields({ form, setForm }) {
 // MAIN PAGE
 // ═════════════════════════════════════════════════════════════════════════════
 export default function TicketsPage() {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const CURRENT_USER_ID = user?.id;
 
+  const [resources, setResources] = useState([]);
+
+  useEffect(() => {
+      if (!token) return;
+      fetch(`http://localhost:8081/api/resources`, {
+          headers: { Authorization: `Bearer ${token}` }
+      })
+      .then(r => r.json())
+      .then(data => setResources(Array.isArray(data) ? data : []))
+      .catch(() => {});
+  }, [token]);
+
+  const authH = { Authorization: `Bearer ${token}`, "Content-Type": "application/json" };
+
   const api = {
-    getMyTickets:     ()        => apiFetch(`/tickets/my?userId=${CURRENT_USER_ID}`),
-    createTicket:     body      => apiFetch(`/tickets?userId=${CURRENT_USER_ID}`, { method:"POST", body:JSON.stringify(body) }),
-    updateTicket:     (id,body) => apiFetch(`/tickets/${id}`, { method:"PUT",    body:JSON.stringify(body) }),
-    deleteTicket:     id        => apiFetch(`/tickets/${id}`, { method:"DELETE" }),
-    getComments:      tid       => apiFetch(`/tickets/${tid}/comments`),
-    addComment:       (tid,c)   => apiFetch(`/tickets/${tid}/comments/${CURRENT_USER_ID}`, { method:"POST", body:JSON.stringify({content:c}) }),
-    updateComment:    (cid,c)   => apiFetch(`/tickets/comments/${cid}/user/${CURRENT_USER_ID}`, { method:"PUT", body:JSON.stringify({content:c}) }),
-    deleteComment:    cid       => apiFetch(`/tickets/comments/${cid}/user/${CURRENT_USER_ID}`, { method:"DELETE" }),
-    getAttachments:   tid       => apiFetch(`/tickets/${tid}/attachments`),
-    uploadAttachment: (tid,f)   => { const fd=new FormData(); fd.append("file",f); return fetch(`${BASE_URL}/tickets/${tid}/attachments`,{method:"POST",body:fd}).then(r=>r.text()); },
-    deleteAttachment: id        => apiFetch(`/tickets/attachments/${id}`, { method:"DELETE" }),
+      getMyTickets:     ()        => apiFetch(`/tickets/my?userId=${CURRENT_USER_ID}`, { headers: authH }),
+      createTicket:     body      => apiFetch(`/tickets?userId=${CURRENT_USER_ID}`, { method:"POST", body:JSON.stringify(body), headers: authH }),
+      updateTicket:     (id,body) => apiFetch(`/tickets/${id}`, { method:"PUT", body:JSON.stringify(body), headers: authH }),
+      deleteTicket:     id        => apiFetch(`/tickets/${id}`, { method:"DELETE", headers: authH }),
+      getComments:      tid       => apiFetch(`/tickets/${tid}/comments`, { headers: authH }),
+      addComment:       (tid,c)   => apiFetch(`/tickets/${tid}/comments/${CURRENT_USER_ID}`, { method:"POST", body:JSON.stringify({content:c}), headers: authH }),
+      updateComment:    (cid,c)   => apiFetch(`/tickets/comments/${cid}/user/${CURRENT_USER_ID}`, { method:"PUT", body:JSON.stringify({content:c}), headers: authH }),
+      deleteComment:    cid       => apiFetch(`/tickets/comments/${cid}/user/${CURRENT_USER_ID}`, { method:"DELETE", headers: authH }),
+      getAttachments:   tid       => apiFetch(`/tickets/${tid}/attachments`, { headers: authH }),
+      uploadAttachment: (tid,f)   => { const fd=new FormData(); fd.append("file",f); return fetch(`${BASE_URL}/tickets/${tid}/attachments`,{method:"POST",body:fd, headers: { Authorization: `Bearer ${token}` }}).then(r=>r.text()); },
+      deleteAttachment: id        => apiFetch(`/tickets/attachments/${id}`, { method:"DELETE", headers: authH }),
   };
 
   // ── state ──────────────────────────────────────────────────────────────────
@@ -291,14 +318,14 @@ export default function TicketsPage() {
 
   // ── load ───────────────────────────────────────────────────────────────────
   const loadTickets = useCallback(async () => {
-    if (!CURRENT_USER_ID) return;
+    if (!CURRENT_USER_ID || !token) return;
     setLoading(true);
     try {
       const data = await api.getMyTickets();
       setTickets(Array.isArray(data) ? data : []);
     } catch(e) { showToast("Failed to load tickets: " + e.message, true); }
     finally    { setLoading(false); }
-  }, [CURRENT_USER_ID]);
+  }, [CURRENT_USER_ID, token]);
 
   useEffect(() => { loadTickets(); }, [loadTickets]);
 
@@ -430,7 +457,7 @@ export default function TicketsPage() {
 
   // ── render ─────────────────────────────────────────────────────────────────
   return (
-    <div style={{ display:"flex", flexDirection:"column", gap:"1.25rem", fontFamily:"'Inter', system-ui, sans-serif", color:"#1e293b" }}>
+    <div style={{ display:"flex", flexDirection:"column", gap:"1.25rem", fontFamily:"var(--font-body)", color:"#1e293b" }}>
       <style>{`
         @keyframes spin    { to { transform:rotate(360deg); } }
         @keyframes fadeUp  { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
@@ -690,7 +717,7 @@ export default function TicketsPage() {
       {/* ══ CREATE MODAL ════════════════════════════════════════════════════ */}
       {showCreate && (
         <Modal title="Report an Issue" sub="Fill in the details to submit a maintenance request" onClose={() => setShowCreate(false)}>
-          <TicketFormFields form={form} setForm={setForm} />
+          <TicketFormFields form={form} setForm={setForm} resources={resources} />
           {/* file upload */}
           <div style={{ display:"flex", flexDirection:"column", gap:5, marginTop:14 }}>
             <label style={{ fontSize:"0.62rem", fontWeight:800, color:"#94a3b8", textTransform:"uppercase", letterSpacing:"0.08em" }}>Attach Photos</label>
@@ -716,7 +743,7 @@ export default function TicketsPage() {
       {/* ══ EDIT TICKET MODAL ═══════════════════════════════════════════════ */}
       {showEdit && selected && (
         <Modal title={`Edit Ticket #${selected.id}`} sub="Update the details of your request" onClose={() => setShowEdit(false)} zIndex={110}>
-          <TicketFormFields form={editForm} setForm={setEditForm} />
+          <TicketFormFields form={editForm} setForm={setEditForm} resources={resources} />
           <div style={{ display:"flex", gap:9, marginTop:20, paddingTop:16, borderTop:"1px solid #f1f5f9" }}>
             <PrimaryBtn onClick={saveEdit} loading={editSaving}>{editSaving ? "Saving…" : "Save Changes"}</PrimaryBtn>
             <GhostBtn onClick={() => setShowEdit(false)}>Cancel</GhostBtn>
