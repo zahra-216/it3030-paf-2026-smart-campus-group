@@ -91,34 +91,46 @@ export default function AdminNotificationsPage() {
     };
 
     const handleMarkRead = async (id) => {
+        // Update UI immediately
+        setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
+        window.dispatchEvent(new Event("notif-updated"));
+        
         try {
             await axios.put(`http://localhost:8081/api/notifications/${id}/read`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
-            // Dispatch event so Topbar refreshes
-            window.dispatchEvent(new Event("notif-updated"));
-        } catch {}
+        } catch {
+            fetchNotifications();
+        }
     };
 
     const handleDelete = async (id) => {
+        // Remove from UI immediately (optimistic)
+        setNotifications(prev => prev.filter(n => n.id !== id));
+        window.dispatchEvent(new Event("notif-updated"));
+        
         try {
             await axios.delete(`http://localhost:8081/api/notifications/${id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            setNotifications(prev => prev.filter(n => n.id !== id));
-            window.dispatchEvent(new Event("notif-updated"));
-        } catch {}
+        } catch {
+            // If it fails, re-fetch to restore correct state
+            fetchNotifications();
+        }
     };
 
     const handleMarkAllRead = async () => {
+        // Update UI immediately
+        setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+        window.dispatchEvent(new Event("notif-updated"));
+        
         try {
             await axios.put("http://localhost:8081/api/notifications/read-all", {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
-            window.dispatchEvent(new Event("notif-updated"));
-        } catch {}
+        } catch {
+            fetchNotifications();
+        }
     };
 
     const filters = ["ALL", "BOOKING", "TICKET"];
