@@ -4,7 +4,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-export default function AdminDashboard() {
+export default function AdminDashboard({ onPageChange }) {
     const { user } = useAuth(); 
     const [time, setTime] = useState(new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }));
     const { token } = useAuth();
@@ -141,12 +141,16 @@ export default function AdminDashboard() {
                         <h2 style={styles.cardTitle}>Quick Actions</h2>
                         <div style={styles.actionsGrid}>
                             {[
-                                { icon: "🏛️", label: "Add Facility" },
-                                { icon: "📅", label: "New Booking" },
-                                { icon: "🔧", label: "Report Issue" },
-                                { icon: "👥", label: "Manage Users" },
+                                { icon: "🏛️", label: "Add Facility", desc: "Add a new resource", color: "#1B4332", page: "resources" },
+                                { icon: "📅", label: "New Booking", desc: "Book a room or equipment", color: "#D97706", page: "bookings" },
+                                { icon: "🔧", label: "Report Issue", desc: "Submit a maintenance ticket", color: "#2D6A4F", page: "tickets" },
+                                { icon: "👥", label: "Manage Users", desc: "View and manage users", color: "#495057", page: "users" },
                             ].map((a, i) => (
-                                <button key={i} style={styles.actionBtn}>
+                                <button
+                                    key={i}
+                                    style={styles.actionBtn}
+                                    onClick={() => onPageChange(a.page)}
+                                >
                                     <span style={styles.actionBtnIcon}>{a.icon}</span>
                                     <span style={styles.actionBtnLabel}>{a.label}</span>
                                 </button>

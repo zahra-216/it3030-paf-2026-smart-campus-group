@@ -9,6 +9,7 @@ const adminMenu = [
             { id: "resources", label: "Facilities", icon: FacilIcon },
             { id: "bookings", label: "Bookings", icon: BookIcon },
             { id: "tickets", label: "Maintenance", icon: MaintIcon },
+            { id: "notifications", label: "Notifications", icon: NotifIcon },
         ]
     },
     {

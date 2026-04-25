@@ -4,7 +4,7 @@ import StatCard from "../../components/ui/StatCard";
 import Badge from "../../components/ui/Badge";
 import axios from "axios";
 
-export default function UserDashboard() {
+export default function UserDashboard({ onPageChange }) {
     const [time, setTime] = useState(new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }));
 
     useEffect(() => {
