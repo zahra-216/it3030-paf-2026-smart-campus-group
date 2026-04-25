@@ -9,7 +9,7 @@ import AdminResourcesPage from "./AdminResourcesPage";
 import UserResourcesPage from "./UserResourcesPage";
 import TechnicianDashboard from "./dashboard/TechnicianDashboard";
 import TicketsPage from "./TicketsPage";
-import TicketsDetailsPage from "./TicketsDetailsPage";
+
 
 export default function Dashboard() {
     const { user } = useAuth();

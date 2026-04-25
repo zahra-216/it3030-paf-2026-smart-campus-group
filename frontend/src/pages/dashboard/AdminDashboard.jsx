@@ -3,6 +3,7 @@ import Badge from "../../components/ui/Badge";
 import { useAuth } from "../../context/AuthContext";
 import { useState, useEffect } from "react";
 import axios from "axios";
+import AdminDashboardTickets from "../AdminDashboardTickets";
 
 const recentBookings = [
     { id: 1, resource: "Lecture Hall A", user: "Dr. Sarah Chen", date: "Apr 10, 2026", time: "09:00 - 11:00", status: "APPROVED" },
@@ -156,32 +157,7 @@ export default function AdminDashboard() {
             </div>
 
             {/* Tickets Table */}
-            <div style={{ ...styles.card, marginTop: 0 }}>
-                <div style={styles.cardHead}>
-                    <h2 style={styles.cardTitle}>Active Maintenance Tickets</h2>
-                    <button style={styles.viewAll}>View All</button>
-                </div>
-                <table style={styles.table}>
-                    <thead>
-                        <tr>
-                            {["ID", "ISSUE", "PRIORITY", "STATUS", "ASSIGNEE"].map(h => (
-                                <th key={h} style={styles.th}>{h}</th>
-                            ))}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {tickets.map(t => (
-                            <tr key={t.id} style={styles.tr}>
-                                <td style={{ ...styles.td, color: "#6B7280", fontFamily: "monospace", fontSize: "0.82rem" }}>{t.id}</td>
-                                <td style={{ ...styles.td, color: "#111827", fontWeight: 500 }}>{t.issue}</td>
-                                <td style={styles.td}><Badge status={t.priority} /></td>
-                                <td style={styles.td}><Badge status={t.status} /></td>
-                                <td style={{ ...styles.td, color: "#6B7280" }}>{t.assignee}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+            <AdminDashboardTickets />
         </div>
     );
 }
