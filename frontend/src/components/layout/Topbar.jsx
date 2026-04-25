@@ -46,6 +46,16 @@ export default function Topbar() {
         return () => document.removeEventListener("mousedown", handler);
     }, [token]);
 
+    const handleMarkAllRead = async () => {
+        try {
+            await axios.put("http://localhost:8081/api/notifications/read-all", {}, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setUnreadCount(0);
+            setNotifications([]);
+        } catch {}
+    };
+
     return (
         <header style={styles.topbar}>
             {/* Search */}
@@ -74,7 +84,7 @@ export default function Topbar() {
                         <div style={styles.dropdown}>
                             <div style={styles.dropHead}>
                                 <span style={styles.dropTitle}>Notifications</span>
-                                <button style={styles.markAll}>Mark all read</button>
+                                <button style={styles.markAll} onClick={handleMarkAllRead}>Mark all read</button>
                             </div>
                             {notifications.length === 0 ? (
                                 <div style={styles.dropEmpty}>
