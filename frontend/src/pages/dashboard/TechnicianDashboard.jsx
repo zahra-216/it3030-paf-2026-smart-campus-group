@@ -3,13 +3,7 @@ import { useAuth } from "../../context/AuthContext";
 import StatCard from "../../components/ui/StatCard";
 import Badge from "../../components/ui/Badge";
 import axios from "axios";
-
-const myTickets = [
-    { id: "TK-001", issue: "Projector malfunction in Hall C", priority: "HIGH", status: "OPEN", location: "Hall C", category: "EQUIPMENT" },
-    { id: "TK-002", issue: "AC not working - Lab 301", priority: "MEDIUM", status: "IN_PROGRESS", location: "Lab 301", category: "ELECTRICAL" },
-    { id: "TK-003", issue: "Broken window - Room 105", priority: "LOW", status: "IN_PROGRESS", location: "Room 105", category: "FURNITURE" },
-    { id: "TK-004", issue: "Network issues - Library Wing", priority: "HIGH", status: "OPEN", location: "Library", category: "EQUIPMENT" },
-];
+import TechnicianDashboardTickets from "../TechnicianDashboardTickets";
 
 export default function TechnicianDashboard() {
     const { user, token } = useAuth();
@@ -106,47 +100,7 @@ export default function TechnicianDashboard() {
             )}
 
             {/* Tickets Table */}
-            <div style={styles.card}>
-                <div style={styles.cardHead}>
-                    <div>
-                        <h2 style={styles.cardTitle}>My Assigned Tickets</h2>
-                        <p style={styles.cardSub}>Tickets assigned to you — update status as you work</p>
-                    </div>
-                </div>
-
-                <table style={styles.table}>
-                    <thead>
-                        <tr>
-                            {["ID", "ISSUE", "LOCATION", "CATEGORY", "PRIORITY", "STATUS", "ACTION"].map(h => (
-                                <th key={h} style={styles.th}>{h}</th>
-                            ))}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {myTickets.map(t => (
-                            <tr key={t.id} style={styles.tr}>
-                                <td style={{ ...styles.td, color: "var(--color-text-light)", fontFamily: "monospace", fontSize: "0.8rem" }}>{t.id}</td>
-                                <td style={{ ...styles.td, fontWeight: 600, color: "var(--color-text)" }}>{t.issue}</td>
-                                <td style={{ ...styles.td, color: "var(--color-text-light)" }}>{t.location}</td>
-                                <td style={styles.td}>
-                                    <span style={styles.categoryPill}>{t.category}</span>
-                                </td>
-                                <td style={styles.td}><Badge status={t.priority} /></td>
-                                <td style={styles.td}><Badge status={t.status} /></td>
-                                <td style={styles.td}>
-                                    {t.status !== "RESOLVED" ? (
-                                        <button style={styles.resolveBtn} onClick={() => handleResolve(t.id)}>
-                                            Mark Resolved
-                                        </button>
-                                    ) : (
-                                        <span style={styles.resolvedText}>✓ Done</span>
-                                    )}
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+             <TechnicianDashboardTickets />
 
             {/* Quick Guide */}
             <div style={styles.guideCard}>

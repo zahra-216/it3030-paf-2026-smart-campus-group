@@ -8,6 +8,8 @@ import UsersAndRolesPage from "./UsersAndRolesPage";
 import AdminResourcesPage from "./AdminResourcesPage";
 import UserResourcesPage from "./UserResourcesPage";
 import TechnicianDashboard from "./dashboard/TechnicianDashboard";
+import TicketsPage from "./TicketsPage";
+
 
 export default function Dashboard() {
     const { user } = useAuth();
@@ -27,6 +29,8 @@ export default function Dashboard() {
                 return <NotificationsPage />;
             case "users":
                 return <UsersAndRolesPage />;
+            case "tickets":
+                return <TicketsPage />;    
             default:
                 return (
                     <div style={styles.empty}>
