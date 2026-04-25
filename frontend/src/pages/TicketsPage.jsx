@@ -239,10 +239,15 @@ function TicketFormFields({ form, setForm }) {
       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12 }}>
         <Field label="Contact Number">
           <input style={INP} placeholder="07X XXX XXXX"
-            value={form.contactDetails} onChange={e => setForm({ ...form, contactDetails:e.target.value })}
-            onFocus={e => { e.target.style.borderColor="#3b82f6"; e.target.style.boxShadow="0 0 0 3px rgba(59,130,246,0.1)"; }}
-            onBlur={e  => { e.target.style.borderColor="#e8edf3"; e.target.style.boxShadow="none"; }} />
-        </Field>
+              value={form.contactDetails}
+              maxLength={10}
+              onChange={e => {
+                  const val = e.target.value.replace(/\D/g, ""); // only digits
+                  setForm({ ...form, contactDetails: val });
+              }}
+              onFocus={e => { e.target.style.borderColor="#3b82f6"; e.target.style.boxShadow="0 0 0 3px rgba(59,130,246,0.1)"; }}
+              onBlur={e  => { e.target.style.borderColor="#e8edf3"; e.target.style.boxShadow="none"; }} />
+      </Field>
       </div>
       <Field label="Describe the Issue">
         <textarea style={TA} placeholder="What's happening? Include details that help the technician…"
@@ -361,6 +366,12 @@ export default function TicketsPage() {
   };
   const saveEdit = async () => {
     if (!editForm.location || !editForm.title) { showToast("Location and Title are required.", true); return; }
+    
+    if (editForm.contactDetails && editForm.contactDetails.trim().length !== 10) {
+        showToast("Contact number must be exactly 10 digits.", true);
+        return;
+    }
+    
     setEditSaving(true);
     try {
       const body = { resourceId:editForm.resourceId?Number(editForm.resourceId):null, location:editForm.location, title:editForm.title, description:editForm.description, category:editForm.category, priority:editForm.priority, contactDetails:editForm.contactDetails };
@@ -375,6 +386,12 @@ export default function TicketsPage() {
   // ── create ─────────────────────────────────────────────────────────────────
   const createTicket = async () => {
     if (!form.location || !form.title) { showToast("Location and Title are required.", true); return; }
+    
+    if (form.contactDetails && form.contactDetails.trim().length !== 10) {
+        showToast("Contact number must be exactly 10 digits.", true);
+        return;
+    }
+
     setSubmitting(true);
     try {
       const body = { resourceId:form.resourceId?Number(form.resourceId):null, location:form.location, title:form.title, description:form.description, category:form.category, priority:form.priority, contactDetails:form.contactDetails };
