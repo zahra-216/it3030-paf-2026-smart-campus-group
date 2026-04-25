@@ -62,6 +62,7 @@ public class SecurityConfig {
 
                 // Notification endpoints
                 .requestMatchers("/api/notifications/**").authenticated()
+                .requestMatchers(HttpMethod.DELETE, "/api/notifications/**").authenticated()
 
                 // Resource endpoints
                 .requestMatchers(HttpMethod.GET, "/api/resources").authenticated()
@@ -73,7 +74,7 @@ public class SecurityConfig {
                 // Booking endpoints
                 .requestMatchers(HttpMethod.POST, "/api/bookings").authenticated()
                 .requestMatchers(HttpMethod.POST, "/api/bookings/check").authenticated()
-                .requestMatchers(HttpMethod.GET, "/api/bookings").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/bookings").authenticated()
                 .requestMatchers(HttpMethod.GET, "/api/bookings/{id}").authenticated()
                 .requestMatchers(HttpMethod.GET, "/api/bookings/status/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/api/bookings/*/approve").hasRole("ADMIN")

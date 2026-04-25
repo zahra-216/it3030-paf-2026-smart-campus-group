@@ -1,5 +1,6 @@
 package com.paf.unidesk.controller;
 
+import com.paf.unidesk.exception.ResourceNotFoundException;
 import com.paf.unidesk.model.Notification;
 import com.paf.unidesk.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,5 +58,15 @@ public class NotificationController {
         String token = authHeader.substring(7);
         notificationService.markAllAsRead(token);
         return ResponseEntity.ok("All notifications marked as read");
+    }
+
+    // Delete a notification
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteNotification(
+            @RequestHeader("Authorization") String authHeader,
+            @PathVariable Long id) {
+        String token = authHeader.substring(7);
+        notificationService.deleteNotification(token, id);
+        return ResponseEntity.noContent().build();
     }
 }

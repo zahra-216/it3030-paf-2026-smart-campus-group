@@ -7,11 +7,16 @@ import org.springframework.stereotype.Service;
 
 import com.paf.unidesk.enums.BookingStatus;
 import com.paf.unidesk.enums.NotificationType;
+import com.paf.unidesk.enums.Role;
 import com.paf.unidesk.model.Booking;
+import com.paf.unidesk.model.User;
 import com.paf.unidesk.repository.BookingRepository;
+import com.paf.unidesk.repository.UserRepository;
 
 @Service
 public class BookingService {
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     private BookingRepository bookingRepository;
@@ -72,7 +77,25 @@ public class BookingService {
         // 🔴 Default status
         booking.setStatus(BookingStatus.PENDING);
 
-        return bookingRepository.save(booking);
+        Booking saved = bookingRepository.save(booking);
+
+        // Fetch full booking with user and resource populated
+        Booking fullBooking = bookingRepository.findById(saved.getId())
+                .orElse(saved);
+
+        // Notify all admins about new booking
+        List<User> admins = userRepository.findAll().stream()
+                .filter(u -> u.getRole() == Role.ADMIN)
+                .toList();
+        for (User admin : admins) {
+            notificationService.createNotification(
+                    admin,
+                    "New booking request from " + fullBooking.getUser().getName() + " for " + fullBooking.getResource().getName(),
+                    NotificationType.BOOKING,
+                    saved.getId()
+            );
+        }
+        return saved;
     }
 
     // ✅ NEW METHOD (🔥 MAIN FEATURE)
@@ -155,6 +178,30 @@ public class BookingService {
             booking.getId()
         );
 
+        return saved;
+    }
+
+    // ✅ Cancel booking
+    public Booking cancelBooking(Long id, String reason) {
+        Booking booking = getBookingById(id);
+        if (booking.getStatus() == BookingStatus.CANCELLED) {
+            throw new RuntimeException("Booking already cancelled");
+        }
+        booking.setStatus(BookingStatus.CANCELLED);
+
+        // Set reason if provided
+        if (reason != null && !reason.trim().isEmpty()) {
+            booking.setRejectionReason(reason); // reuse rejectionReason field
+        }
+
+        Booking saved = bookingRepository.save(booking);
+
+        notificationService.createNotification(
+            booking.getUser(),
+            "Your booking for " + booking.getResource().getName() + " on " + booking.getDate() + " has been cancelled.",
+            NotificationType.BOOKING,
+            saved.getId()
+        );
         return saved;
     }
 
