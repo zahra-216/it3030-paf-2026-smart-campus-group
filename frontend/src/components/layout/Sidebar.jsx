@@ -10,6 +10,7 @@ const adminMenu = [
             { id: "bookings", label: "Bookings", icon: BookIcon },
             { id: "tickets", label: "Maintenance", icon: MaintIcon },
             { id: "notifications", label: "Notifications", icon: NotifIcon },
+            { id: "notif-prefs", label: "Notif. Settings", icon: SettingsIcon },
         ]
     },
     {
@@ -30,6 +31,7 @@ const userMenu = [
             { id: "bookings", label: "Bookings", icon: BookIcon },
             { id: "tickets", label: "Maintenance", icon: MaintIcon },
             { id: "notifications", label: "Notifications", icon: NotifIcon },
+            { id: "notif-prefs", label: "Notif. Settings", icon: SettingsIcon },
         ]
     }
 ];
@@ -41,6 +43,7 @@ const technicianMenu = [
             { id: "dashboard", label: "Dashboard", icon: DashIcon },
             { id: "tickets", label: "My Tickets", icon: MaintIcon },
             { id: "notifications", label: "Notifications", icon: NotifIcon },
+            { id: "notif-prefs", label: "Notif. Settings", icon: SettingsIcon },
         ]
     }
 ];

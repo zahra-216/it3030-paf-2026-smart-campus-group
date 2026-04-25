@@ -13,13 +13,13 @@ export default function AdminDashboard({ onPageChange }) {
     const [ticketLoading, setTicketLoading] = useState(true);
     const [bookings, setBookings] = useState([]);
 
-    const [resourceCount, setResourceCount] = useState(0);
+    const [resources, setResources] = useState([]);
 
     useEffect(() => {
         axios.get("http://localhost:8081/api/resources", {
             headers: { Authorization: `Bearer ${token}` }
         })
-        .then(res => setResourceCount(res.data.length))
+        .then(res => setResources(Array.isArray(res.data) ? res.data : []))
         .catch(() => {});
     }, [token]);
 
@@ -73,7 +73,7 @@ export default function AdminDashboard({ onPageChange }) {
             <div style={styles.statsRow}>
                 <StatCard
                     label="Total Facilities"
-                    value={String(resourceCount)}
+                    value={String(resources.length)}
                     icon="🏛️"
                     sub="Available resources"
                     subColor="#059669"
@@ -214,18 +214,250 @@ export default function AdminDashboard({ onPageChange }) {
                         {tickets.map(t => (
                             <tr key={t.id} style={styles.tr}>
                                 <td style={{ ...styles.td, color: "#6B7280", fontFamily: "monospace", fontSize: "0.82rem" }}>{t.id}</td>
-                                <td style={{ ...styles.td, color: "#111827", fontWeight: 500 }}>{t.issue}</td>
+                                <td style={{ ...styles.td, color: "#111827", fontWeight: 500 }}>{t.title || t.issue || "—"}</td>
                                 <td style={styles.td}><Badge status={t.priority} /></td>
                                 <td style={styles.td}><Badge status={t.status} /></td>
-                                <td style={{ ...styles.td, color: "#6B7280" }}>{t.assignee}</td>
+                                <td style={{ ...styles.td, color: "#6B7280" }}>{t.assignedToName || "Unassigned"}</td>
                             </tr>
                         ))}
                     </tbody>
                 </table>
             </div>
+            <AnalyticsSection bookings={bookings} tickets={tickets} resources={resources} />
         </div>
     );
 }
+
+function AnalyticsSection({ bookings, tickets, resources }) {
+    // ── Top Resources by Bookings ─────────────────────────────
+    const resourceBookingCount = bookings.reduce((acc, b) => {
+        const name = b.resource?.name || "Unknown";
+        acc[name] = (acc[name] || 0) + 1;
+        return acc;
+    }, {});
+
+    const topResources = Object.entries(resourceBookingCount)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5);
+
+    const maxBookings = topResources[0]?.[1] || 1;
+
+    // ── Booking Status Breakdown ──────────────────────────────
+    const bookingStats = [
+        { label: "Approved",  value: bookings.filter(b => b.status === "APPROVED").length,  color: "var(--color-primary)", bg: "#E8F5E9" },
+        { label: "Pending",   value: bookings.filter(b => b.status === "PENDING").length,   color: "#D97706",              bg: "#FEF3C7" },
+        { label: "Rejected",  value: bookings.filter(b => b.status === "REJECTED").length,  color: "#DC2626",              bg: "#FEE2E2" },
+        { label: "Cancelled", value: bookings.filter(b => b.status === "CANCELLED").length, color: "#6B7280",              bg: "#F3F4F6" },
+    ];
+
+    // ── Ticket Category Breakdown ─────────────────────────────
+    const categoryCount = tickets.reduce((acc, t) => {
+        const cat = t.category || "OTHER";
+        acc[cat] = (acc[cat] || 0) + 1;
+        return acc;
+    }, {});
+
+    const categoryStats = Object.entries(categoryCount)
+        .sort((a, b) => b[1] - a[1]);
+
+    const maxCat = categoryStats[0]?.[1] || 1;
+
+    // ── Peak Booking Days ─────────────────────────────────────
+    const dayCount = bookings.reduce((acc, b) => {
+        if (!b.date) return acc;
+        const day = new Date(b.date).toLocaleDateString("en-US", { weekday: "short" });
+        acc[day] = (acc[day] || 0) + 1;
+        return acc;
+    }, {});
+
+    const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    const dayStats = days.map(d => ({ day: d, count: dayCount[d] || 0 }));
+    const maxDay = Math.max(...dayStats.map(d => d.count), 1);
+
+    const totalBookings = bookings.length;
+    const totalTickets = tickets.length;
+
+    if (totalBookings === 0 && totalTickets === 0) return null;
+
+    return (
+        <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+            {/* Section Header */}
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <div style={{
+                    width: 36, height: 36, borderRadius: 10,
+                    backgroundColor: "var(--color-primary)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: "1rem",
+                }}>📊</div>
+                <div>
+                    <h2 style={{ fontFamily: "var(--font-heading)", fontSize: "1rem", fontWeight: 700, color: "var(--color-text)", margin: 0 }}>
+                        Usage Analytics
+                    </h2>
+                    <p style={{ fontSize: "0.78rem", color: "var(--color-text-light)", margin: 0 }}>
+                        Overview of campus activity
+                    </p>
+                </div>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+
+                {/* Top Resources */}
+                <div style={analyticsCard}>
+                    <h3 style={analyticsTitle}>🏛️ Top Booked Resources</h3>
+                    {topResources.length === 0 ? (
+                        <p style={emptyText}>No booking data yet</p>
+                    ) : (
+                        <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 8 }}>
+                            {topResources.map(([name, count], i) => (
+                                <div key={name}>
+                                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                                        <span style={{ fontSize: "0.8rem", fontWeight: 600, color: "var(--color-text)" }}>
+                                            {i + 1}. {name}
+                                        </span>
+                                        <span style={{ fontSize: "0.78rem", color: "var(--color-text-light)", fontWeight: 600 }}>
+                                            {count} booking{count !== 1 ? "s" : ""}
+                                        </span>
+                                    </div>
+                                    <div style={{ height: 8, backgroundColor: "var(--color-light-gray)", borderRadius: 999, overflow: "hidden" }}>
+                                        <div style={{
+                                            height: "100%",
+                                            width: `${(count / maxBookings) * 100}%`,
+                                            backgroundColor: i === 0 ? "var(--color-primary)" : i === 1 ? "var(--color-primary-light)" : "#A8C5A8",
+                                            borderRadius: 999,
+                                            transition: "width 0.5s ease",
+                                        }} />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+                {/* Booking Status Breakdown */}
+                <div style={analyticsCard}>
+                    <h3 style={analyticsTitle}>📅 Booking Status Breakdown</h3>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 8 }}>
+                        {bookingStats.map(s => (
+                            <div key={s.label} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                                <div style={{
+                                    width: 10, height: 10, borderRadius: "50%",
+                                    backgroundColor: s.color, flexShrink: 0,
+                                }} />
+                                <span style={{ fontSize: "0.8rem", color: "var(--color-text)", flex: 1 }}>{s.label}</span>
+                                <div style={{ display: "flex", alignItems: "center", gap: 8, flex: 2 }}>
+                                    <div style={{ flex: 1, height: 8, backgroundColor: "var(--color-light-gray)", borderRadius: 999, overflow: "hidden" }}>
+                                        <div style={{
+                                            height: "100%",
+                                            width: totalBookings > 0 ? `${(s.value / totalBookings) * 100}%` : "0%",
+                                            backgroundColor: s.color,
+                                            borderRadius: 999,
+                                            transition: "width 0.5s ease",
+                                        }} />
+                                    </div>
+                                    <span style={{ fontSize: "0.78rem", fontWeight: 700, color: s.color, minWidth: 24, textAlign: "right" }}>
+                                        {s.value}
+                                    </span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                    {totalBookings > 0 && (
+                        <p style={{ fontSize: "0.72rem", color: "var(--color-text-light)", marginTop: 10, textAlign: "right" }}>
+                            Total: {totalBookings} bookings
+                        </p>
+                    )}
+                </div>
+
+                {/* Peak Booking Days */}
+                <div style={analyticsCard}>
+                    <h3 style={analyticsTitle}>📆 Peak Booking Days</h3>
+                    {totalBookings === 0 ? (
+                        <p style={emptyText}>No booking data yet</p>
+                    ) : (
+                        <div style={{ display: "flex", alignItems: "flex-end", gap: 8, height: 100, marginTop: 12 }}>
+                            {dayStats.map(({ day, count }) => (
+                                <div key={day} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+                                    <span style={{ fontSize: "0.65rem", color: "var(--color-text-light)", fontWeight: 600 }}>
+                                        {count > 0 ? count : ""}
+                                    </span>
+                                    <div style={{
+                                        width: "100%",
+                                        height: `${Math.max((count / maxDay) * 80, count > 0 ? 8 : 0)}px`,
+                                        backgroundColor: count > 0 ? "var(--color-primary)" : "var(--color-light-gray)",
+                                        borderRadius: "4px 4px 0 0",
+                                        opacity: count > 0 ? 1 : 0.3,
+                                        transition: "height 0.5s ease",
+                                    }} />
+                                    <span style={{ fontSize: "0.65rem", color: "var(--color-text-light)", fontWeight: 600 }}>{day}</span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+                {/* Ticket Category Breakdown */}
+                <div style={analyticsCard}>
+                    <h3 style={analyticsTitle}>🔧 Ticket Categories</h3>
+                    {categoryStats.length === 0 ? (
+                        <p style={emptyText}>No ticket data yet</p>
+                    ) : (
+                        <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 8 }}>
+                            {categoryStats.map(([cat, count], i) => {
+                                const colors = ["var(--color-primary)", "#D97706", "#1D4ED8", "#DC2626", "#6B7280"];
+                                return (
+                                    <div key={cat}>
+                                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
+                                            <span style={{ fontSize: "0.78rem", fontWeight: 600, color: "var(--color-text)" }}>
+                                                {cat.replace(/_/g, " ")}
+                                            </span>
+                                            <span style={{ fontSize: "0.75rem", color: "var(--color-text-light)" }}>
+                                                {count} ticket{count !== 1 ? "s" : ""}
+                                            </span>
+                                        </div>
+                                        <div style={{ height: 7, backgroundColor: "var(--color-light-gray)", borderRadius: 999, overflow: "hidden" }}>
+                                            <div style={{
+                                                height: "100%",
+                                                width: `${(count / maxCat) * 100}%`,
+                                                backgroundColor: colors[i % colors.length],
+                                                borderRadius: 999,
+                                                transition: "width 0.5s ease",
+                                            }} />
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+                    {totalTickets > 0 && (
+                        <p style={{ fontSize: "0.72rem", color: "var(--color-text-light)", marginTop: 10, textAlign: "right" }}>
+                            Total: {totalTickets} tickets
+                        </p>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+}
+
+const analyticsCard = {
+    backgroundColor: "var(--color-white)",
+    borderRadius: 14,
+    padding: "1.25rem 1.5rem",
+    border: "1px solid var(--color-border)",
+};
+const analyticsTitle = {
+    fontFamily: "var(--font-heading)",
+    fontSize: "0.875rem",
+    fontWeight: 700,
+    color: "var(--color-text)",
+    margin: 0,
+};
+const emptyText = {
+    fontSize: "0.82rem",
+    color: "var(--color-text-light)",
+    textAlign: "center",
+    padding: "1.5rem 0",
+};
 
 const styles = {
     page: { display: "flex", flexDirection: "column", gap: "1.25rem" },

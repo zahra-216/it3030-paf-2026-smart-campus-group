@@ -6,19 +6,18 @@ import UserDashboard from "./dashboard/UserDashboard";
 import NotificationsPage from "./NotificationsPage";
 import UsersAndRolesPage from "./UsersAndRolesPage";
 import AdminResourcesPage from "./AdminResourcesPage";
-import UserAdminResourcesPage from "./AdminResourcesPage";
-import UserResourcesPage from "./UserUserResourcesPage";
+import UserResourcesPage from "./UserResourcesPage";
 import TechnicianDashboard from "./dashboard/TechnicianDashboard";
 import TicketsPage from "./TicketsPage";
-
+import AdminDashboardTickets from "./AdminDashboardTickets";
+import TechnicianDashboardTickets from "./TechnicianDashboardTickets";
 import BookingsPage from "./BookingsPage";
 import AdminNotificationsPage from "./AdminNotificationsPage";
+import NotificationPreferencesPage from "./NotificationPreferencesPage";
 
 export default function Dashboard() {
     const { user } = useAuth();
     const [activePage, setActivePage] = useState("dashboard");
-
-    const isAdmin = user?.role === "ADMIN";
 
     const isAdmin = user?.role === "ADMIN";
 
@@ -27,13 +26,11 @@ export default function Dashboard() {
             case "dashboard":
                 if (user?.role === "ADMIN") return <AdminDashboard onPageChange={setActivePage} />;
                 if (user?.role === "TECHNICIAN") return <TechnicianDashboard />;
-                return <UserDashboard />;
+                return <UserDashboard onPageChange={setActivePage} />;
             case "resources":
                 return isAdmin ? <AdminResourcesPage /> : <UserResourcesPage />;
-           case "bookings":
+            case "bookings":
                return <BookingsPage setActivePage={setActivePage} />;
-            case "resources":
-                return isAdmin ? <AdminResourcesPage /> : <UserResourcesPage />;
             case "notifications":
                 return user?.role === "ADMIN"
                     ? <AdminNotificationsPage />
@@ -41,7 +38,11 @@ export default function Dashboard() {
             case "users":
                 return <UsersAndRolesPage />;
             case "tickets":
-                return <TicketsPage />;    
+                if (user?.role === "ADMIN") return <AdminDashboardTickets />;
+                if (user?.role === "TECHNICIAN") return <TechnicianDashboardTickets />;
+                return <TicketsPage />;  
+            case "notif-prefs":
+                return <NotificationPreferencesPage />; 
             default:
                 return (
                     <div style={styles.empty}>

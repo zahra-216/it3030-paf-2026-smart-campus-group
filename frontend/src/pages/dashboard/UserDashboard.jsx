@@ -178,44 +178,48 @@ export default function UserDashboard({ onPageChange }) {
                     <div style={styles.cardHead}>
                         <h2 style={styles.cardTitle}>My Bookings</h2>
                     </div>
-                    {myBookings.length === 0 ? (
-                        <div style={styles.empty}>
-                            <p>No bookings yet</p>
-                        </div>
-                    ) : myBookings.map(b => (
-                        <div key={b.id} style={styles.row}>
-                            <div style={styles.rowIcon}>📅</div>
-                            <div style={styles.rowInfo}>
-                                <p style={styles.rowName}>{b.resource?.name || "Resource"}</p>
-                                <p style={styles.rowMeta}>{b.date} · {b.startTime} - {b.endTime}</p>
+                    <div style={{ maxHeight: 280, overflowY: "auto", paddingRight: "0.75rem" }}>
+                        {myBookings.length === 0 ? (
+                            <div style={styles.empty}>
+                                <p>No bookings yet</p>
                             </div>
-                            <Badge status={b.status} />
-                        </div>
-                    ))}
+                        ) : myBookings.map(b => (
+                            <div key={b.id} style={styles.row}>
+                                <div style={styles.rowIcon}>📅</div>
+                                <div style={styles.rowInfo}>
+                                    <p style={styles.rowName}>{b.resource?.name || "Resource"}</p>
+                                    <p style={styles.rowMeta}>{b.date} · {b.startTime} - {b.endTime}</p>
+                                </div>
+                                <Badge status={b.status} />
+                            </div>
+                        ))}
+                    </div>
                 </div>
 
                 <div style={styles.card}>
                     <div style={styles.cardHead}>
                         <h2 style={styles.cardTitle}>My Tickets</h2>
                     </div>
-                    {myTickets.map(t => (
-                        <div key={t.id} style={styles.row}>
-                            <div style={styles.rowIcon}>🔧</div>
-                            <div style={styles.rowInfo}>
-                                <p style={styles.rowName}>{t.issue}</p>
-                                <p style={styles.rowMeta}>{t.id}</p>
+                    <div style={{ maxHeight: 280, overflowY: "auto", paddingRight: "0.75rem" }}>
+                        {myTickets.map(t => (
+                            <div key={t.id} style={styles.row}>
+                                <div style={styles.rowIcon}>🔧</div>
+                                <div style={styles.rowInfo}>
+                                    <p style={styles.rowName}>{t.title}</p>
+                                    <p style={styles.rowMeta}>#{t.id}</p>
+                                </div>
+                                <div style={{ display: "flex", flexDirection: "column", gap: 4, alignItems: "flex-end" }}>
+                                    <Badge status={t.priority} />
+                                    <Badge status={t.status} />
+                                </div>
                             </div>
-                            <div style={{ display: "flex", flexDirection: "column", gap: 4, alignItems: "flex-end" }}>
-                                <Badge status={t.priority} />
-                                <Badge status={t.status} />
+                        ))}
+                        {myTickets.length === 0 && (
+                            <div style={styles.empty}>
+                                <p>No tickets yet</p>
                             </div>
-                        </div>
-                    ))}
-                    {myTickets.length === 0 && (
-                        <div style={styles.empty}>
-                            <p>No tickets yet</p>
-                        </div>
-                    )}
+                        )}
+                    </div>
                 </div>
             </div>
         </div>
