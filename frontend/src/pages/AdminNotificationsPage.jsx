@@ -8,44 +8,63 @@ const TYPE_CONFIG = {
     COMMENT: { icon: "💬", label: "Comment", color: "#1D4ED8",              bg: "#EFF6FF" },
 };
 
-function NotifCard({ notif, onMarkRead }) {
+function NotifCard({ notif, onMarkRead, onDelete }) {
     const type = TYPE_CONFIG[notif.type] || TYPE_CONFIG.TICKET;
     const timeAgo = getTimeAgo(notif.createdAt);
 
     return (
-        <div style={{
-            ...styles.card,
-            backgroundColor: notif.isRead ? "var(--color-white)" : "#F0FAF4",
-            borderLeft: notif.isRead ? "3px solid transparent" : "3px solid var(--color-primary)",
-        }}>
-            <div style={{ ...styles.iconWrap, backgroundColor: type.bg }}>
-                <span style={{ fontSize: "1.1rem" }}>{type.icon}</span>
-            </div>
-            <div style={styles.cardBody}>
-                <div style={styles.cardTop}>
-                    <span style={{ ...styles.typeBadge, backgroundColor: type.bg, color: type.color }}>
-                        {type.label}
-                    </span>
-                    <span style={styles.timeAgo}>{timeAgo}</span>
+            <div style={{
+                ...styles.card,
+                backgroundColor: notif.isRead ? "var(--color-white)" : "#F0FAF4",
+                borderLeft: notif.isRead ? "3px solid transparent" : `3px solid var(--color-primary)`,
+            }}>
+                <div style={{ ...styles.iconWrap, backgroundColor: type.bg }}>
+                    <span style={{ fontSize: "1.1rem" }}>{type.icon}</span>
                 </div>
-                <p style={{
-                    ...styles.message,
-                    fontWeight: notif.isRead ? 400 : 600,
-                    color: notif.isRead ? "var(--color-text-light)" : "var(--color-text)",
-                }}>
-                    {notif.message}
-                </p>
+
+                <div style={styles.cardBody}>
+                    <div style={styles.cardTop}>
+                        <span style={{ ...styles.typeBadge, backgroundColor: type.bg, color: type.color }}>
+                            {type.label}
+                        </span>
+                        <span style={styles.timeAgo}>{timeAgo}</span>
+                    </div>
+                    <p style={{
+                        ...styles.message,
+                        fontWeight: notif.isRead ? 400 : 600,
+                        color: notif.isRead ? "var(--color-text-light)" : "var(--color-text)",
+                    }}>
+                        {notif.message}
+                    </p>
+                </div>
+
+                <div style={styles.cardActions}>
+                    {!notif.isRead && (
+                        <button
+                            style={styles.markBtn}
+                            title="Mark as read"
+                            onClick={() => onMarkRead(notif.id)}
+                        >
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                        </button>
+                    )}
+                    <button
+                        style={styles.deleteBtn}
+                        title="Delete notification"
+                        onClick={() => onDelete(notif.id)}
+                    >
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <polyline points="3 6 5 6 21 6"/>
+                            <path d="M19 6l-1 14H6L5 6"/>
+                            <path d="M10 11v6M14 11v6"/>
+                            <path d="M9 6V4h6v2"/>
+                        </svg>
+                    </button>
+                </div>
             </div>
-            {!notif.isRead && (
-                <button style={styles.markBtn} onClick={() => onMarkRead(notif.id)}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                        <polyline points="20 6 9 17 4 12"/>
-                    </svg>
-                </button>
-            )}
-            {notif.isRead && <div style={styles.readDot} />}
-        </div>
-    );
+        );
 }
 
 export default function AdminNotificationsPage() {
@@ -78,6 +97,16 @@ export default function AdminNotificationsPage() {
             });
             setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
             // Dispatch event so Topbar refreshes
+            window.dispatchEvent(new Event("notif-updated"));
+        } catch {}
+    };
+
+    const handleDelete = async (id) => {
+        try {
+            await axios.delete(`http://localhost:8081/api/notifications/${id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setNotifications(prev => prev.filter(n => n.id !== id));
             window.dispatchEvent(new Event("notif-updated"));
         } catch {}
     };
@@ -185,7 +214,7 @@ export default function AdminNotificationsPage() {
                                     Unread
                                 </p>
                                 {displayedNotifs.filter(n => !n.isRead).map(n => (
-                                    <NotifCard key={n.id} notif={n} onMarkRead={handleMarkRead} />
+                                    <NotifCard key={n.id} notif={n} onMarkRead={handleMarkRead} onDelete={handleDelete} />
                                 ))}
                             </div>
                         )}
@@ -198,7 +227,7 @@ export default function AdminNotificationsPage() {
                                     Earlier
                                 </p>
                                 {displayedNotifs.filter(n => n.isRead).map(n => (
-                                    <NotifCard key={n.id} notif={n} onMarkRead={handleMarkRead} />
+                                    <NotifCard key={n.id} notif={n} onMarkRead={handleMarkRead} onDelete={handleDelete}/>
                                 ))}
                             </div>
                         )}
@@ -243,6 +272,25 @@ const styles = {
         padding: "0.6rem 1.1rem", backgroundColor: "var(--color-primary)",
         color: "var(--color-white)", border: "none", borderRadius: 8,
         fontSize: "0.82rem", fontWeight: 600, cursor: "pointer", fontFamily: "var(--font-body)",
+    },
+    cardActions: {
+        display: "flex",
+        flexDirection: "column",
+        gap: 6,
+        flexShrink: 0,
+    },
+    deleteBtn: {
+        width: 30,
+        height: 30,
+        borderRadius: 8,
+        border: "1px solid #FEE2E2",
+        backgroundColor: "#FFF5F5",
+        color: "#DC2626",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        cursor: "pointer",
+        flexShrink: 0,
     },
     statsRow: { display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 },
     statCard: {

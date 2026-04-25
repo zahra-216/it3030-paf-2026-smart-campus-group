@@ -107,10 +107,9 @@ export default function AdminDashboard({ onPageChange }) {
                 <div style={styles.card}>
                     <div style={styles.cardHead}>
                         <h2 style={styles.cardTitle}>Recent Bookings</h2>
-                        <button style={styles.viewAll}>View All</button>
                     </div>
                     <div>
-                        <div style={{ maxHeight: 320, overflowY: "auto" }}>
+                        <div style={{ maxHeight: 320, overflowY: "auto", paddingRight: "0.75rem" }}>
                             {bookings.length === 0 ? (
                                 <div style={styles.emptyBookings}>
                                     <span style={{ fontSize: "2rem" }}>📭</span>
@@ -199,7 +198,31 @@ export default function AdminDashboard({ onPageChange }) {
             </div>
 
             {/* Tickets Table */}
-            <AdminDashboardTickets />
+            <div style={{ ...styles.card, marginTop: 0 }}>
+                <div style={styles.cardHead}>
+                    <h2 style={styles.cardTitle}>Active Maintenance Tickets</h2>
+                </div>
+                <table style={styles.table}>
+                    <thead>
+                        <tr>
+                            {["ID", "ISSUE", "PRIORITY", "STATUS", "ASSIGNEE"].map(h => (
+                                <th key={h} style={styles.th}>{h}</th>
+                            ))}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {tickets.map(t => (
+                            <tr key={t.id} style={styles.tr}>
+                                <td style={{ ...styles.td, color: "#6B7280", fontFamily: "monospace", fontSize: "0.82rem" }}>{t.id}</td>
+                                <td style={{ ...styles.td, color: "#111827", fontWeight: 500 }}>{t.issue}</td>
+                                <td style={styles.td}><Badge status={t.priority} /></td>
+                                <td style={styles.td}><Badge status={t.status} /></td>
+                                <td style={{ ...styles.td, color: "#6B7280" }}>{t.assignee}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
         </div>
     );
 }
@@ -254,8 +277,6 @@ const styles = {
     },
     cardHead: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem" },
     cardTitle: { fontFamily: "var(--font-heading)", fontSize: "0.95rem", fontWeight: 700, color: "#111827" },
-    viewAll: { fontSize: "0.78rem", color: "var(--color-primary)", background: "none", border: "none", cursor: "pointer", fontWeight: 500 },
-
     bookingRow: {
         display: "flex", alignItems: "center", gap: 12,
         padding: "0.75rem 0",

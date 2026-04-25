@@ -46,8 +46,10 @@ export default function UserDashboard({ onPageChange }) {
                 headers: { Authorization: `Bearer ${token}` }
             })
             .then(res => {
-                // filter only current user's bookings
-                const userBookings = res.data.filter(b => b.user?.id === user.id);
+                const data = Array.isArray(res.data) ? res.data : [];
+                const userBookings = data.filter(b => 
+                    String(b.user?.id) === String(user?.id)
+                );
                 setMyBookings(userBookings);
             })
             .catch(() => setMyBookings([]));
@@ -175,7 +177,6 @@ export default function UserDashboard({ onPageChange }) {
                 <div style={styles.card}>
                     <div style={styles.cardHead}>
                         <h2 style={styles.cardTitle}>My Bookings</h2>
-                        <button style={styles.viewAll}>View All</button>
                     </div>
                     {myBookings.length === 0 ? (
                         <div style={styles.empty}>
@@ -196,7 +197,6 @@ export default function UserDashboard({ onPageChange }) {
                 <div style={styles.card}>
                     <div style={styles.cardHead}>
                         <h2 style={styles.cardTitle}>My Tickets</h2>
-                        <button style={styles.viewAll}>View All</button>
                     </div>
                     {myTickets.map(t => (
                         <div key={t.id} style={styles.row}>
