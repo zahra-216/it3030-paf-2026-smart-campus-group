@@ -28,9 +28,9 @@ const STATUS_CFG = {
   REJECTED:    { color:"#ea580c", light:"#fff7ed", border:"#fed7aa", label:"Rejected",    dot:"#f97316" },
 };
 const PRIORITY_CFG = {
-  HIGH:   { color:"#dc2626", light:"#fef2f2", bar:"#ef4444", label:"High",   icon:"🔴" },
-  MEDIUM: { color:"#d97706", light:"#fffbeb", bar:"#f59e0b", label:"Medium", icon:"🟡" },
-  LOW:    { color:"#16a34a", light:"#f0fdf4", bar:"#22c55e", label:"Low",    icon:"🟢" },
+  HIGH:   { color:"#dc2626", light:"#fef2f2", bar:"#ef4444", label:"High" },
+  MEDIUM: { color:"#d97706", light:"#fffbeb", bar:"#f59e0b", label:"Medium" },
+  LOW:    { color:"#16a34a", light:"#f0fdf4", bar:"#22c55e", label:"Low" },
 };
 
 const normStatus   = s => s ? String(s).toUpperCase().replace(/ /g,"_") : "OPEN";
@@ -613,7 +613,7 @@ export default function TicketsPage() {
                 <span style={{ fontSize:"0.8rem", fontWeight:800, color:"#0f172a" }}>Recent Activity</span>
               </div>
               <span style={{ fontSize:"0.65rem", fontWeight:700, padding:"2px 8px", borderRadius:20, background:"#f1f5f9", color:"#64748b" }}>
-               {actFeed.length} shown
+              {Math.min(actFeed.length, 5)} shown
               </span>
             </div>
 
@@ -624,7 +624,7 @@ export default function TicketsPage() {
               </div>
             ) : (
               <div style={{ display:"flex", flexDirection:"column" }}>
-                {actFeed.map(({ t, act, time }, i) => (
+                {actFeed.slice(0, 5).map(({ t, act, time }, i) => (
                   <div key={t.id} className="actrow" onClick={() => openDetail(t)}
                     style={{ display:"flex", gap:10, padding:"9px 6px", borderRadius:10, cursor:"pointer", transition:"background 0.13s", borderBottom: i < actFeed.length-1 ? "1px solid #f8fafc" : "none" }}>
 
