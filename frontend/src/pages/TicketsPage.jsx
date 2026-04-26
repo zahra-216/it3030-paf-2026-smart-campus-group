@@ -186,7 +186,7 @@ const TA  = { ...INP, resize:"vertical", minHeight:88, lineHeight:1.65 };
 const pill = (bg, color, border) => ({ padding:"3px 10px", borderRadius:20, fontSize:"0.7rem", fontWeight:700, background:bg, color, border:`1px solid ${border||"transparent"}`, letterSpacing:"0.02em", display:"inline-block" });
 
 // ─── TICKET FORM FIELDS (reused in create + edit) ─────────────────────────────
-function TicketFormFields({ form, setForm }) {
+function TicketFormFields({ form, setForm, resources = [] }) {
   return (
     <div style={{ display:"flex", flexDirection:"column", gap:14 }}>
       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12 }}>

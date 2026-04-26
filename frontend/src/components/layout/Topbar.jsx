@@ -62,16 +62,24 @@ export default function Topbar({ setActivePage}) {
         searchTimer.current = setTimeout(async () => {
             try {
                 const headers = { Authorization: `Bearer ${token}` };
-                const [resources, tickets] = await Promise.all([
+                let ticketsUrl;
+                if (user?.role === "ADMIN") {
+                    ticketsUrl = `${import.meta.env.VITE_API_URL}/api/tickets/filter`;
+                } else if (user?.role === "TECHNICIAN") {
+                    ticketsUrl = `${import.meta.env.VITE_API_URL}/api/tickets/my-assigned/${user.id}`;
+                } else {
+                    ticketsUrl = `${import.meta.env.VITE_API_URL}/api/tickets/my?userId=${user?.id}`;
+                }
+                const [resourcesResult, ticketsResult] = await Promise.allSettled([
                     axios.get(`${import.meta.env.VITE_API_URL}/api/resources`, { headers }),
-                    axios.get(`${import.meta.env.VITE_API_URL}/api/tickets/filter`, { headers }),
+                    axios.get(ticketsUrl, { headers }),
                 ]);
                 const q = searchQuery.toLowerCase();
                 const results = [
-                    ...resources.data
+                    ...(resourcesResult.status === "fulfilled" ? resourcesResult.value.data : [])
                         .filter(r => r.name?.toLowerCase().includes(q) || r.location?.toLowerCase().includes(q))
                         .map(r => ({ type: "resource", icon: "🏛️", label: r.name, sub: r.location, page: "resources" })),
-                    ...tickets.data
+                    ...(ticketsResult.status === "fulfilled" ? ticketsResult.value.data : [])
                         .filter(t => t.title?.toLowerCase().includes(q) || t.location?.toLowerCase().includes(q))
                         .map(t => ({ type: "ticket", icon: "🔧", label: t.title || t.category, sub: `#${t.id} · ${t.location}`, page: "tickets" })),
                 ].slice(0, 6);
@@ -79,7 +87,7 @@ export default function Topbar({ setActivePage}) {
                 setSearchOpen(true);
             } catch { setSearchResults([]); }
         }, 350);
-    }, [searchQuery, token]);
+    }, [searchQuery, token, user]);
 
     useEffect(() => {
         const handler = (e) => {
