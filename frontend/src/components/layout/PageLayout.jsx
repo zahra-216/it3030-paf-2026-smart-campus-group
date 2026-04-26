@@ -6,7 +6,7 @@ export default function PageLayout({ activePage, setActivePage, children }) {
         <div style={styles.wrapper}>
             <Sidebar activePage={activePage} setActivePage={setActivePage} />
             <div style={styles.body}>
-                <Topbar />
+                <Topbar setActivePage={setActivePage} />
                 <main style={styles.main}>
                     {children}
                 </main>
