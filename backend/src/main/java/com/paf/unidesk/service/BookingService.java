@@ -60,9 +60,7 @@ public class BookingService {
 
         Booking fullBooking = bookingRepository.findById(saved.getId()).orElse(saved);
 
-        List<User> admins = userRepository.findAll().stream()
-                .filter(u -> u.getRole() == Role.ADMIN)
-                .toList();
+        List<User> admins = userRepository.findByRole(Role.ADMIN);
         for (User admin : admins) {
             notificationService.createNotification(
                     admin,

@@ -10,6 +10,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,7 +19,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users", indexes = { @Index(columnList = "role") })
 @Data // Lombok annotation to generate getters, setters, toString, equals, and hashCode methods
 @Builder // Lombok annotation to implement the builder pattern for this class
 @NoArgsConstructor // Lombok annotation to generate empty constructor

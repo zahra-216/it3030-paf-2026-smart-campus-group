@@ -51,7 +51,7 @@ const QUICK_ACTIONS = [
 // ── relative time ──────────────────────────────────────────────────────────
 function relTime(raw) {
   if (!raw) return "";
-  const d = new Date(raw), now = new Date(), ms = now - d;
+  const d = new Date(raw.endsWith("Z") ? raw : raw + "Z"), now = new Date(), ms = now - d;
   const m = Math.floor(ms / 60000), h = Math.floor(ms / 3600000), dy = Math.floor(ms / 86400000);
   if (m < 1)   return "just now";
   if (m < 60)  return `${m}m ago`;

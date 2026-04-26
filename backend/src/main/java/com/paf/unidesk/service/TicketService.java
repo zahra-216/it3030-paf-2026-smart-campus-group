@@ -64,9 +64,7 @@ public class TicketService {
 
         Ticket saved = ticketRepository.save(ticket);
 
-        List<User> admins = userRepository.findAll().stream()
-        .filter(u -> u.getRole() == Role.ADMIN)
-        .toList();
+        List<User> admins = userRepository.findByRole(Role.ADMIN);
         for (User admin : admins) {
             notificationService.createNotification(
                     admin,
@@ -304,9 +302,7 @@ public TicketResponse technicianUpdateTicket(
 
         ticket.setStatus(newStatus);
 
-        List<User> admins = userRepository.findAll().stream()
-            .filter(u -> u.getRole() == Role.ADMIN)
-            .toList();
+        List<User> admins = userRepository.findByRole(Role.ADMIN);
         for (User admin : admins) {
             notificationService.createNotification(
                     admin,

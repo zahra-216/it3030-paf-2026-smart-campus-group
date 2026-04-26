@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
 
@@ -362,7 +362,6 @@ export default function BookingsPage() {
     const [showForm, setShowForm]     = useState(false);
     const [resources, setResources]   = useState([]);
     const [bookings, setBookings]     = useState([]);
-    const [filtered, setFiltered]     = useState([]);
     const [search, setSearch]         = useState("");
     const [statusFilter, setStatusFilter] = useState("ALL");
     const [rejectModal, setRejectModal]   = useState({ open: false, bookingId: null });
@@ -393,15 +392,14 @@ export default function BookingsPage() {
             const userFiltered = isAdmin ? data : data.filter(b => String(b.user?.id) === String(user?.id));
             const reversed = [...userFiltered].reverse();
             setBookings(reversed);
-            setFiltered(reversed);
         } catch { showToast("Failed to load bookings", "error"); }
     };
 
-    useEffect(() => {
-        let data = [...bookings];
+    const filtered = useMemo(() => {
+        let data = bookings;
         if (search.trim()) data = data.filter(b => (b.resource?.name || "").toLowerCase().includes(search.toLowerCase()));
         if (statusFilter !== "ALL") data = data.filter(b => b.status?.toUpperCase() === statusFilter);
-        setFiltered(data);
+        return data;
     }, [search, statusFilter, bookings]);
 
     const toMins = t => { if (!t) return 0; const [h,m] = t.split(":").map(Number); return h*60+m; };
