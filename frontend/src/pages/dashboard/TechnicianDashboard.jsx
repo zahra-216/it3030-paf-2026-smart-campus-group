@@ -57,7 +57,7 @@ export default function TechnicianDashboard() {
 
     const open = myTickets.filter(t => t.status === "OPEN").length;
     const inProgress = myTickets.filter(t => t.status === "IN_PROGRESS").length;
-    const high = myTickets.filter(t => t.priority === "HIGH").length;
+    const high = myTickets.filter(t => t.priority === "HIGH" && !["CLOSED", "RESOLVED", "REJECTED"].includes(t.status)).length;
 
     return (
         <div style={styles.page}>

@@ -422,7 +422,7 @@ export default function BookingsPage() {
             showToast("Booking created successfully");
             setShowForm(false);
             fetchBookings();
-        } catch (err) { showToast(err.response?.data || "Failed to create booking", "error"); }
+        } catch (err) { showToast(err.response?.data?.message || "Failed to create booking", "error"); }
     };
 
     const handleApprove = async (id) => {
