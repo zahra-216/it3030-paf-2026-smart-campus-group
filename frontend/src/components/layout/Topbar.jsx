@@ -101,11 +101,11 @@ export default function Topbar({ setActivePage}) {
     const handleMarkAllRead = async () => {
         setUnreadCount(0);
         setNotifications([]);
-        window.dispatchEvent(new Event("notif-updated"));
         try {
             await axios.put(`${import.meta.env.VITE_API_URL}/api/notifications/read-all`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
+            window.dispatchEvent(new Event("notif-updated"));
         } catch {}
     };
 
