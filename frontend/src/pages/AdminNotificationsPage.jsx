@@ -67,8 +67,18 @@ function NotifCard({ notif, onMarkRead, onDelete }) {
         );
 }
 
+const PREF_KEY = "unidesk_notif_prefs";
+function getNotifPrefs(userId) {
+    try {
+        const saved = localStorage.getItem(`${PREF_KEY}_${userId}`);
+        return saved ? JSON.parse(saved) : { BOOKING: true, TICKET: true, COMMENT: true };
+    } catch {
+        return { BOOKING: true, TICKET: true, COMMENT: true };
+    }
+}
+
 export default function AdminNotificationsPage() {
-    const { token } = useAuth();
+    const { token, user } = useAuth();
     const [notifications, setNotifications] = useState([]);
     const [filter, setFilter] = useState("ALL");
     const [loading, setLoading] = useState(true);
@@ -134,7 +144,11 @@ export default function AdminNotificationsPage() {
     };
 
     const filters = ["ALL", "BOOKING", "TICKET"];
-    const filtered = notifications.filter(n => filter === "ALL" ? true : n.type === filter);
+    const prefs = getNotifPrefs(user?.id);
+    const filtered = notifications.filter(n => {
+        if (prefs[n.type] === false) return false;
+        return filter === "ALL" ? true : n.type === filter;
+    });
     const unreadCount = notifications.filter(n => !n.isRead).length;
     const displayedNotifs = showAll ? filtered : filtered.slice(0, 10);
 

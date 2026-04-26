@@ -2,6 +2,16 @@ import { useState, useRef, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import axios from "axios";
 
+const PREF_KEY = "unidesk_notif_prefs";
+function getNotifPrefs(userId) {
+    try {
+        const saved = localStorage.getItem(`${PREF_KEY}_${userId}`);
+        return saved ? JSON.parse(saved) : { BOOKING: true, TICKET: true, COMMENT: true };
+    } catch {
+        return { BOOKING: true, TICKET: true, COMMENT: true };
+    }
+}
+
 function getTimeAgo(dateStr) {
     if (!dateStr) return "";
     const diff = Date.now() - new Date(dateStr.endsWith("Z") ? dateStr : dateStr + "Z").getTime();
@@ -27,34 +37,22 @@ export default function Topbar({ setActivePage}) {
     const searchTimer = useRef(null);
 
     useEffect(() => {
-        if (token) {
-            axios.get(`${import.meta.env.VITE_API_URL}/api/notifications/unread`, {
-                headers: { Authorization: `Bearer ${token}` }
-            })
-            .then(res => {
-                setUnreadCount(res.data.length);
-                setNotifications(res.data);
-            })
-            .catch(() => {});
-        }
-    }, [token]);
-
-    useEffect(() => {
         const fetchNotifData = () => {
             if (!token) return;
-            axios.get(`${import.meta.env.VITE_API_URL}/api/notifications/unread/count`, {
-                headers: { Authorization: `Bearer ${token}` }
-            }).then(res => setUnreadCount(res.data.unreadCount)).catch(() => {});
-
             axios.get(`${import.meta.env.VITE_API_URL}/api/notifications/unread`, {
                 headers: { Authorization: `Bearer ${token}` }
-            }).then(res => setNotifications(res.data)).catch(() => {});
+            }).then(res => {
+                const prefs = getNotifPrefs(user?.id);
+                const filtered = res.data.filter(n => prefs[n.type] !== false);
+                setNotifications(filtered);
+                setUnreadCount(filtered.length);
+            }).catch(() => {});
         };
 
         fetchNotifData();
         window.addEventListener("notif-updated", fetchNotifData);
         return () => window.removeEventListener("notif-updated", fetchNotifData);
-    }, [token]);
+    }, [token, user?.id]);
 
     useEffect(() => {
         if (!searchQuery.trim()) { setSearchResults([]); setSearchOpen(false); return; }
@@ -175,7 +173,7 @@ export default function Topbar({ setActivePage}) {
                                 </div>
                             ) : (
                                 <div style={{ maxHeight: 300, overflowY: "auto" }}>
-                                    {notifications.slice(0, 5).map(n => (
+                                    {notifications.map(n => (
                                         <div key={n.id} style={styles.notifItem}>
                                             <span style={styles.notifDot} />
                                             <div>

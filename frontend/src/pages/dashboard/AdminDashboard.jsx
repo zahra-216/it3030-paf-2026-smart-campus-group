@@ -374,7 +374,7 @@ function AnalyticsSection({ bookings, tickets, resources }) {
                     {totalBookings === 0 ? (
                         <p style={emptyText}>No booking data yet</p>
                     ) : (
-                        <div style={{ display: "flex", alignItems: "flex-end", gap: 8, height: 100, marginTop: 12 }}>
+                        <div style={{ display: "flex", alignItems: "flex-end", gap: 8, height: 100, marginTop: 24 }}>
                             {dayStats.map(({ day, count }) => (
                                 <div key={day} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
                                     <span style={{ fontSize: "0.65rem", color: "var(--color-text-light)", fontWeight: 600 }}>

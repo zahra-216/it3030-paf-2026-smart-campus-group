@@ -79,8 +79,18 @@ function EmptyState() {
     );
 }
 
+const PREF_KEY = "unidesk_notif_prefs";
+function getNotifPrefs(userId) {
+    try {
+        const saved = localStorage.getItem(`${PREF_KEY}_${userId}`);
+        return saved ? JSON.parse(saved) : { BOOKING: true, TICKET: true, COMMENT: true };
+    } catch {
+        return { BOOKING: true, TICKET: true, COMMENT: true };
+    }
+}
+
 export default function NotificationsPage() {
-    const { token } = useAuth();
+    const { token, user } = useAuth();
     const [notifications, setNotifications] = useState([]);
     const [filter, setFilter] = useState("ALL");
     const [loading, setLoading] = useState(true);
@@ -146,9 +156,11 @@ export default function NotificationsPage() {
 
     const filters = ["ALL", "BOOKING", "TICKET", "COMMENT"];
 
-    const filtered = notifications.filter(n =>
-        filter === "ALL" ? true : n.type === filter
-    );
+    const prefs = getNotifPrefs(user?.id);
+    const filtered = notifications.filter(n => {
+        if (prefs[n.type] === false) return false;
+        return filter === "ALL" ? true : n.type === filter;
+    });
 
     const unreadCount = notifications.filter(n => !n.isRead).length;
 
