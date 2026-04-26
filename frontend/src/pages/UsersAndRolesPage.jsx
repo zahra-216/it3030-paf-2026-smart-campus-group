@@ -87,7 +87,7 @@ export default function UsersAndRolesPage() {
     const fetchUsers = async () => {
         setLoading(true);
         try {
-            const res = await axios.get("http://localhost:8081/api/auth/users", {
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/auth/users`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setUsers(res.data);
@@ -102,7 +102,7 @@ export default function UsersAndRolesPage() {
         setChangingRole(userId);
         try {
             await axios.put(
-                `http://localhost:8081/api/auth/users/${userId}/role?role=${newRole}`,
+                `${import.meta.env.VITE_API_URL}/api/auth/users/${userId}/role?role=${newRole}`,
                 {},
                 { headers: { Authorization: `Bearer ${token}` } }
             );

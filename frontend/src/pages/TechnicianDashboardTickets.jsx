@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../context/AuthContext";
 // ─── CONFIG ───────────────────────────────────────────────────────────────────
-const BASE_URL = "http://localhost:8081/api";
+const BASE_URL = `${import.meta.env.VITE_API_URL}/api`;
 
 async function apiFetch(path, options = {}) {
     const res = await fetch(`${BASE_URL}${path}`, {
@@ -584,10 +584,10 @@ export default function TechnicianDashboardTickets() {
                                                 {attachments.map(a => (
                                                     <div key={a.id} style={{ position: "relative", borderRadius: 12, overflow: "hidden", border: "1.5px solid #e8edf3" }}>
                                                         <img
-                                                            src={`http://localhost:8081/uploads/${a.fileUrl}`}
+                                                            src={`${import.meta.env.VITE_API_URL}/uploads/${a.fileUrl}`}
                                                             alt="attachment"
                                                             style={{ width: "100%", height: 90, objectFit: "cover", cursor: "pointer", display: "block" }}
-                                                            onClick={() => setPreviewImage(`http://localhost:8081/uploads/${a.fileUrl}`)}
+                                                            onClick={() => setPreviewImage(`${import.meta.env.VITE_API_URL}/uploads/${a.fileUrl}`)}
                                                         />
                                                         <button onClick={() => deleteAtt(a.id)}
                                                             style={{ position: "absolute", top: 5, right: 5, width: 22, height: 22, borderRadius: 6, background: "rgba(0,0,0,0.65)", color: "#fff", border: "none", cursor: "pointer", fontSize: 11, fontWeight: 900, display: "flex", alignItems: "center", justifyContent: "center" }}>

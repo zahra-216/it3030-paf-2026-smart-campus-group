@@ -20,7 +20,7 @@ export default function UserDashboard({ onPageChange }) {
 
     useEffect(() => {
         if (token) {
-            axios.get("http://localhost:8081/api/notifications/unread/count", {
+            axios.get(`${import.meta.env.VITE_API_URL}/api/notifications/unread/count`, {
                 headers: { Authorization: `Bearer ${token}` }
             })
             .then(res => setUnreadCount(res.data.unreadCount))
@@ -35,14 +35,14 @@ export default function UserDashboard({ onPageChange }) {
     useEffect(() => {
         if (user?.id) {
             // fetch my tickets
-            axios.get(`http://localhost:8081/api/tickets/my?userId=${user.id}`, {
+            axios.get(`${import.meta.env.VITE_API_URL}/api/tickets/my?userId=${user.id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             })
             .then(res => setMyTickets(res.data))
             .catch(() => setMyTickets([]));
 
             // fetch my bookings
-            axios.get("http://localhost:8081/api/bookings", {
+            axios.get(`${import.meta.env.VITE_API_URL}/api/bookings`, {
                 headers: { Authorization: `Bearer ${token}` }
             })
             .then(res => {
@@ -55,7 +55,7 @@ export default function UserDashboard({ onPageChange }) {
             .catch(() => setMyBookings([]));
 
             // fetch resources count
-            axios.get("http://localhost:8081/api/resources", {
+            axios.get(`${import.meta.env.VITE_API_URL}/api/resources`, {
                 headers: { Authorization: `Bearer ${token}` }
             })
             .then(res => setResourceCount(res.data.length))
@@ -65,7 +65,7 @@ export default function UserDashboard({ onPageChange }) {
 
     useEffect(() => {
         if (user?.id) {
-            axios.get(`http://localhost:8081/api/tickets/my?userId=${user.id}`, {
+            axios.get(`${import.meta.env.VITE_API_URL}/api/tickets/my?userId=${user.id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             })
             .then(res => setMyTickets(res.data))

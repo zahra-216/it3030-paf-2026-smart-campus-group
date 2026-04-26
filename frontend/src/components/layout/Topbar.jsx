@@ -34,7 +34,7 @@ export default function Topbar() {
 
     useEffect(() => {
         if (token) {
-            axios.get("http://localhost:8081/api/notifications/unread", {
+            axios.get(`${import.meta.env.VITE_API_URL}/api/notifications/unread`, {
                 headers: { Authorization: `Bearer ${token}` }
             })
             .then(res => {
@@ -48,11 +48,11 @@ export default function Topbar() {
     useEffect(() => {
         const fetchNotifData = () => {
             if (!token) return;
-            axios.get("http://localhost:8081/api/notifications/unread/count", {
+            axios.get(`${import.meta.env.VITE_API_URL}/api/notifications/unread/count`, {
                 headers: { Authorization: `Bearer ${token}` }
             }).then(res => setUnreadCount(res.data.unreadCount)).catch(() => {});
 
-            axios.get("http://localhost:8081/api/notifications/unread", {
+            axios.get(`${import.meta.env.VITE_API_URL}/api/notifications/unread`, {
                 headers: { Authorization: `Bearer ${token}` }
             }).then(res => setNotifications(res.data)).catch(() => {});
         };
@@ -77,7 +77,7 @@ export default function Topbar() {
         setNotifications([]);
         window.dispatchEvent(new Event("notif-updated"));
         try {
-            await axios.put("http://localhost:8081/api/notifications/read-all", {}, {
+            await axios.put(`${import.meta.env.VITE_API_URL}/api/notifications/read-all`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
         } catch {}

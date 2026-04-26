@@ -8,6 +8,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -26,6 +27,9 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     @Autowired
     private JwtUtil jwtUtil;
 
+    @Value("${app.frontend-url}")
+    private String frontendUrl;
+
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
                                         HttpServletResponse response,
@@ -34,7 +38,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         OAuth2AuthenticationToken authToken = (OAuth2AuthenticationToken) authentication;
         OAuth2User oAuth2User = authToken.getPrincipal();
-        String provider = authToken.getAuthorizedClientRegistrationId(); // "google" or "github"
+        String provider = authToken.getAuthorizedClientRegistrationId();
 
         String email = null;
         String name = null;
@@ -58,7 +62,6 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
             oAuthProvider = OAuthProvider.GITHUB;
         }
 
-        // Check if user already exists
         Optional<User> existingUser = userRepository.findByEmail(email);
 
         User user;
@@ -76,11 +79,9 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
             userRepository.save(user);
         }
 
-        // Generate JWT token
         String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name());
 
-        // Redirect to frontend with token
-        String redirectUrl = "http://localhost:5173/oauth2/callback?token=" + token;
+        String redirectUrl = frontendUrl + "/oauth2/callback?token=" + token;
         getRedirectStrategy().sendRedirect(request, response, redirectUrl);
     }
 }

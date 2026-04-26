@@ -79,7 +79,7 @@ export default function AdminNotificationsPage() {
     const fetchNotifications = async () => {
         setLoading(true);
         try {
-            const res = await axios.get("http://localhost:8081/api/notifications", {
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/notifications`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setNotifications(res.data);
@@ -96,7 +96,7 @@ export default function AdminNotificationsPage() {
         window.dispatchEvent(new Event("notif-updated"));
         
         try {
-            await axios.put(`http://localhost:8081/api/notifications/${id}/read`, {}, {
+            await axios.put(`${import.meta.env.VITE_API_URL}/api/notifications/${id}/read`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
         } catch {
@@ -110,7 +110,7 @@ export default function AdminNotificationsPage() {
         window.dispatchEvent(new Event("notif-updated"));
         
         try {
-            await axios.delete(`http://localhost:8081/api/notifications/${id}`, {
+            await axios.delete(`${import.meta.env.VITE_API_URL}/api/notifications/${id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
         } catch {
@@ -125,7 +125,7 @@ export default function AdminNotificationsPage() {
         window.dispatchEvent(new Event("notif-updated"));
         
         try {
-            await axios.put("http://localhost:8081/api/notifications/read-all", {}, {
+            await axios.put(`${import.meta.env.VITE_API_URL}/api/notifications/read-all`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
         } catch {

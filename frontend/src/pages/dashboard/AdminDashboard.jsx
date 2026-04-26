@@ -16,7 +16,7 @@ export default function AdminDashboard({ onPageChange }) {
     const [resources, setResources] = useState([]);
 
     useEffect(() => {
-        axios.get("http://localhost:8081/api/resources", {
+        axios.get(`${import.meta.env.VITE_API_URL}/api/resources`, {
             headers: { Authorization: `Bearer ${token}` }
         })
         .then(res => setResources(Array.isArray(res.data) ? res.data : []))
@@ -31,7 +31,7 @@ export default function AdminDashboard({ onPageChange }) {
     }, []);
 
     useEffect(() => {
-        axios.get("http://localhost:8081/api/bookings", {
+        axios.get(`${import.meta.env.VITE_API_URL}/api/bookings`, {
             headers: { Authorization: `Bearer ${token}` }
         })
         .then(res => setBookings(res.data))
@@ -39,7 +39,7 @@ export default function AdminDashboard({ onPageChange }) {
     }, [token]);
 
     useEffect(() => {
-        axios.get("http://localhost:8081/api/tickets/filter", {
+        axios.get(`${import.meta.env.VITE_API_URL}/api/tickets/filter`, {
             headers: { Authorization: `Bearer ${token}` }
         })
         .then(res => setTickets(Array.isArray(res.data) ? res.data : res.data.content ?? []))

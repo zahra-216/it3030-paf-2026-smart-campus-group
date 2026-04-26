@@ -3,7 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import Badge from "../components/ui/Badge";
 import { ResourceType, ResourceStatus } from "../constants/enums";
 
-const API_BASE = "http://localhost:8081/api/resources";
+const API_BASE = `${import.meta.env.VITE_API_URL}/api/resources`;
 
 export default function AdminResourcesPage() {
     const { token } = useAuth();

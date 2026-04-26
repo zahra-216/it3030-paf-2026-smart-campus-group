@@ -25,6 +25,8 @@ dist-ssr
 
 
 node_modules
-.env
 application-local.properties
 target
+
+.env
+.env.local

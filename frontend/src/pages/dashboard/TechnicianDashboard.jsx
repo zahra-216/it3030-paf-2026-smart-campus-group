@@ -13,7 +13,7 @@ export default function TechnicianDashboard() {
 
     useEffect(() => {
         if (user?.id) {
-            axios.get(`http://localhost:8081/api/tickets/my-assigned/${user.id}`, {
+            axios.get(`${import.meta.env.VITE_API_URL}/api/tickets/my-assigned/${user.id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             })
             .then(res => setMyTickets(res.data))
@@ -36,7 +36,7 @@ export default function TechnicianDashboard() {
     const handleResolve = async (ticketId) => {
         try {
             await axios.put(
-                `http://localhost:8081/api/tickets/${ticketId}/technician-update/${user.id}`,
+                `${import.meta.env.VITE_API_URL}/api/tickets/${ticketId}/technician-update/${user.id}`,
                 { status: "RESOLVED", resolutionNotes: "Issue resolved" },
                 { headers: { Authorization: `Bearer ${token}` } }
             );

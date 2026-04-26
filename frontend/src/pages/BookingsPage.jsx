@@ -381,14 +381,14 @@ export default function BookingsPage() {
 
     const fetchResources = async () => {
         try {
-            const res = await axios.get("http://localhost:8081/api/resources", { headers: { Authorization: `Bearer ${token}` } });
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/resources`, { headers: { Authorization: `Bearer ${token}` } });
             setResources(Array.isArray(res.data) ? res.data : []);
         } catch { showToast("Failed to load resources", "error"); }
     };
 
     const fetchBookings = async () => {
         try {
-            const res = await axios.get("http://localhost:8081/api/bookings", { headers: { Authorization: `Bearer ${token}` } });
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/bookings`, { headers: { Authorization: `Bearer ${token}` } });
             const data = Array.isArray(res.data) ? res.data : [];
             const userFiltered = isAdmin ? data : data.filter(b => String(b.user?.id) === String(user?.id));
             const reversed = [...userFiltered].reverse();
@@ -416,7 +416,7 @@ export default function BookingsPage() {
         const res = resources.find(r => r.id === Number(form.resourceId));
         if (form.attendees > res?.capacity) { showToast(`Exceeds capacity (${res.capacity})`, "error"); return; }
         try {
-            await axios.post("http://localhost:8081/api/bookings", {
+            await axios.post(`${import.meta.env.VITE_API_URL}/api/bookings`, {
                 resource: { id: Number(form.resourceId) }, user: { id: user?.id },
                 date: form.date, startTime: form.startTime, endTime: form.endTime,
                 purpose: form.purpose, attendees: form.attendees,
@@ -429,7 +429,7 @@ export default function BookingsPage() {
 
     const handleApprove = async (id) => {
         try {
-            await axios.put(`http://localhost:8081/api/bookings/${id}/approve`, {}, { headers: { Authorization: `Bearer ${token}` } });
+            await axios.put(`${import.meta.env.VITE_API_URL}/api/bookings/${id}/approve`, {}, { headers: { Authorization: `Bearer ${token}` } });
             showToast("Booking approved");
             fetchBookings();
         } catch { showToast("Approval failed", "error"); }
@@ -437,7 +437,7 @@ export default function BookingsPage() {
 
     const handleReject = async (reason) => {
         try {
-            await axios.put(`http://localhost:8081/api/bookings/${rejectModal.bookingId}/reject?reason=${encodeURIComponent(reason)}`, {}, { headers: { Authorization: `Bearer ${token}` } });
+            await axios.put(`${import.meta.env.VITE_API_URL}/api/bookings/${rejectModal.bookingId}/reject?reason=${encodeURIComponent(reason)}`, {}, { headers: { Authorization: `Bearer ${token}` } });
             showToast("Booking rejected", "warning");
             setRejectModal({ open: false, bookingId: null });
             fetchBookings();
@@ -446,7 +446,7 @@ export default function BookingsPage() {
 
     const handleCancel = async (id) => {
         try {
-            await axios.put(`http://localhost:8081/api/bookings/${id}/cancel`, {}, { headers: { Authorization: `Bearer ${token}` } });
+            await axios.put(`${import.meta.env.VITE_API_URL}/api/bookings/${id}/cancel`, {}, { headers: { Authorization: `Bearer ${token}` } });
             showToast("Booking cancelled", "warning");
             fetchBookings();
         } catch { showToast("Cancel failed", "error"); }
@@ -454,7 +454,7 @@ export default function BookingsPage() {
 
     const handleAdminCancel = async (reason) => {
         try {
-            await axios.put(`http://localhost:8081/api/bookings/${cancelModal.bookingId}/cancel?reason=${encodeURIComponent(reason)}`, {}, { headers: { Authorization: `Bearer ${token}` } });
+            await axios.put(`${import.meta.env.VITE_API_URL}/api/bookings/${cancelModal.bookingId}/cancel?reason=${encodeURIComponent(reason)}`, {}, { headers: { Authorization: `Bearer ${token}` } });
             showToast("Booking cancelled", "warning");
             setCancelModal({ open: false, bookingId: null });
             fetchBookings();
