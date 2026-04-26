@@ -1,6 +1,5 @@
 package com.paf.unidesk.controller;
 
-import com.paf.unidesk.exception.ResourceNotFoundException;
 import com.paf.unidesk.model.Notification;
 import com.paf.unidesk.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
