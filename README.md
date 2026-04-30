@@ -1,4 +1,4 @@
-# UniDesk — Smart Campus Operations Hub
+# UniDesk - Smart Campus Operations Hub
 
 A full-stack web application built for the IT3030 Programming Applications and Frameworks module at SLIIT. UniDesk centralises campus facility bookings, maintenance ticketing, and resource management into a single role-based platform for administrators, staff, and technicians.
 
@@ -66,16 +66,16 @@ Log in using any Google or GitHub account. New users are automatically registere
 
 ## Team
 
-| Student ID   | Name                    | Module                                        |
-|--------------|-------------------------|-----------------------------------------------|
-| IT23708280   | J.H.F. Zahra            | Auth + Notifications (D + E) — Team Lead      |
-| IT23686588   | K.S. Hettiarachchi      | Resource Management (A)                       |
-| IT23684430   | Nuhaz Ahameth M.R       | Booking Management (B)                        |
-| IT23663268   | E.A.D.K.C. Gunasekara   | Maintenance Ticketing (C)                     |
+| Name                    | Module                                   |
+|-------------------------|------------------------------------------|
+| Zahra Hasan             | Auth + Notifications (D + E) — Team Lead |
+| Kauminee Gunasekara     | Resource Management (A)                  |
+| Nuhaz Ahameth M.R       | Booking Management (B)                   |
+| Kulani Sandamila        | Maintenance Ticketing (C)                |
 
 ---
 
 ## Module
 
-IT3030 — Programming Applications and Frameworks  
-Year 3 Semester 1 — SLIIT
+IT3030 - Programming Applications and Frameworks  
+Year 3 Semester 1 - SLIIT
